@@ -26,7 +26,7 @@ This library supports:
 
 ## 👩‍💻 Development
 
-### Local environment
+### 🏗️ Local environment
 
 The local environment is handled with `poetry`, so install that first then:
 
@@ -34,7 +34,7 @@ The local environment is handled with `poetry`, so install that first then:
 $ poetry install
 ```
 
-### Running tests
+### 🧪 Running tests
 
 The tests themselves use `pytest` as the test runner.
 
@@ -50,6 +50,6 @@ The full CI suite is controlled by `tox`, which contains a set of environments t
 $ tox
 ```
 
-#### CI
+#### ⚙️  CI
 
 Uses GitHub Actions, see `./github/workflows`.
