@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "my-app"
+version = "0.1.0"
+description = "Project template for Django app, using Poetry."
+license = "MIT"
+authors = ["YunoJuno <code@yunojuno.com>"]
+maintainers = ["YunoJuno <code@yunojuno.com>"]
+readme = "README.md"
+homepage = "https://github.com/yunojuno/poetry-template"
+repository = "https://github.com/yunojuno/poetry-template"
+documentation = "https://github.com/yunojuno/poetry-template"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 2.2",
+    "Framework :: Django :: 3.0",
+    "Framework :: Django :: 3.1",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+]
+packages = [{ include = "my_app" }]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+django = "^2.2 || ^3.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-django = "*"
+coverage = "*"
+pylint = "*"
+flake8 = "*"
+flake8-bandit = "*"
+flake8-docstrings = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
+black = {version = "*", allow-prereleases = true}
+freezegun = "*"
+tox = "*"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
