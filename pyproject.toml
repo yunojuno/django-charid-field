@@ -1,32 +1,31 @@
 [tool.poetry]
-name = "my-app"
+name = "django-cuidfield"
 version = "0.1.0"
-description = "Project template for Django app, using Poetry."
+description = "Provides a cuid-generating field for your Django models."
 license = "MIT"
 authors = ["YunoJuno <code@yunojuno.com>"]
 maintainers = ["YunoJuno <code@yunojuno.com>"]
 readme = "README.md"
-homepage = "https://github.com/yunojuno/poetry-template"
-repository = "https://github.com/yunojuno/poetry-template"
-documentation = "https://github.com/yunojuno/poetry-template"
+homepage = "https://github.com/yunojuno/django-cuidfield"
+repository = "https://github.com/yunojuno/django-cuidfield"
+documentation = "https://github.com/yunojuno/django-cuidfield"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Web Environment",
     "Framework :: Django",
-    "Framework :: Django :: 2.2",
-    "Framework :: Django :: 3.0",
     "Framework :: Django :: 3.1",
+    "Framework :: Django :: 3.2",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
 ]
-packages = [{ include = "my_app" }]
+packages = [{ include = "cuidfield" }]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-django = "^2.2 || ^3.0"
+python = "^3.8"
+django = "^3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -45,5 +44,5 @@ freezegun = "*"
 tox = "*"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

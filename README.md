@@ -1,71 +1,55 @@
-# Poetry Template
+# django-cuidfield
 
-Django app template, using `poetry-python` as dependency manager.
+Provides a CUIDField for your Django models.
 
-This project is a template that can be cloned and re-used for redistributable apps.
+A [cuid](https://github.com/ericelliott/cuid) is a collision-resistant id optimised for
+horizontal scaling and performance; it was designed by [@ericelliot](https://github.com/ericelliott).
 
-It includes the following:
+cuid looks like this:
 
-* `poetry` for dependency management
-* `isort`, `black`, `pylint` and `flake8` linting
-* `pre-commit` to run linting
-* `mypy` for type checking
-* `tox` and `travis` for builds and CI
+`cjld2cjxh0000qzrmn831i7rn`
 
-There are default config files for the linting and mypy.
+and has the following properties:
 
-## Principles
+* URL-safe.
+* fast, tiny implementation.
+* monotonically increasing.
+* collision-free generation client or server side (horizontally scaleable).
+* more portable than GUID/UUID.
+* and [plenty more](https://github.com/ericelliott/cuid).
 
-The motivation for this project is to provide a consistent set of standards across all YunoJuno public Python/Django projects. The principles we want to encourage are:
+This library supports:
 
-* Simple for developers to get up-and-running:
-    * Install all dev dependencies in an isolated environment
-    * Run complete tox suite locally
-* Consistent style:
-    * Common formatting with `isort` and `black`
-    * Common patterns with `pylint` and `flake8`
-* Full type hinting
+* prefixing the ID on a per-model basis à la Stripe. e.g `cus_cjld2cjxh0000qzrmn831i7rn`
+* PostgreSQL only. It will likely work with other database backends, but we will only maintain for PostgreSQL.
 
-## Versioning
 
-It's 2020, Python2 is officially deprecated, and we run our core platform on recent releases (Python 3.8 and Django 2.2 at the time of writing). Taking out lead from Django itself, we only support Python 3.8/7/6 and Django 2.2/3.0. As new versions arrive we will deprecate older versions at the point at which maintaining becomes a burden. Typically this is when we start to have to incorporate conditional imports into modules. When an older version of Python / Django is deprecated, the last supported version will be tagged as such. In the unlikely event that any bug fixes need to be applied to an old version, they will be done on a branch off the last known good version. They will not be released to PyPI.
+## 👩‍💻 Development
 
-## Tests
+### Local environment
 
-#### Tests package
-The package tests themselves are _outside_ of the main library code, in a package that is itself a Django app (it contains `models`, `settings`, and any other artifacts required to run the tests (e.g. `urls`).) Where appropriate, this test app may be runnable as a Django project - so that developers can spin up the test app and see what admin screens look like, test migrations, etc.
+The local environment is handled with `poetry`, so install that first then:
 
-#### Running tests
-The tests themselves use `pytest` as the test runner. If you have installed the `poetry` evironment, you can run them thus:
+```
+$ poetry install
+```
+
+### Running tests
+
+The tests themselves use `pytest` as the test runner.
+
+After setting up the environment, run them using:
 
 ```
 $ poetry run pytest
 ```
 
-or 
-
-```
-$ poetry shell
-(my_app) $ pytest
-```
-
-The full suite is controlled by `tox`, which contains a set of environments that will format (`fmt`), lint, and test against all support Python + Django version combinations.
+The full CI suite is controlled by `tox`, which contains a set of environments that will format (`fmt`), lint, and test against all support Python + Django version combinations.
 
 ```
 $ tox
-...
-______________________ summary __________________________
-  fmt: commands succeeded
-  lint: commands succeeded
-  mypy: commands succeeded
-  py36-django22: commands succeeded
-  py36-django30: commands succeeded
-  py37-django22: commands succeeded
-  py37-django30: commands succeeded
-  py38-django22: commands succeeded
-  py38-django30: commands succeeded
 ```
 
 #### CI
 
-There is a `.travis.yml` file that can be used as a baseline to run all of the tests on Travis.
+Uses GitHub Actions, see `./github/workflows`.
