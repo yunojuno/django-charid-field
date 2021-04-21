@@ -11,10 +11,11 @@ cuid looks like this:
 
 and has the following properties:
 
-* URL-safe.
 * fast, tiny implementation.
-* monotonically increasing.
 * collision-free generation client or server side (horizontally scaleable).
+* can be created before insertion, avoiding db-round trips to get an id.
+* monotonically increasing, for better primary key peformance.
+* URL-safe. No need to guess whether it should be hyphenated.
 * more portable than GUID/UUID.
 * and [plenty more](https://github.com/ericelliott/cuid).
 
