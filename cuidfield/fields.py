@@ -30,9 +30,10 @@ class CuidDescriptor(DeferredAttribute):
         'cus_'
     """
 
-    # pass
-
     def __set__(self, instance, value):
+        # TODO(pr) Is this needed? Remove after all tests pass if unnecessary.
+        # We should keep the subclassed descriptor though so its easy to edit
+        # in future.
         if value is None or isinstance(value, Cuid):
             instance.__dict__[self.field.name] = value
         else:
