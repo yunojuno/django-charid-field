@@ -20,7 +20,7 @@ def get_prefix_from_class_name(
 
 
 def callable_test_default():
-    return f"test_{generate_cuid()}"
+    return f"{generate_cuid()}_some_suffix"
 
 
 class CuidModel(models.Model):

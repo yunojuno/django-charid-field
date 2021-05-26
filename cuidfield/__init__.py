@@ -1,5 +1,5 @@
 from .cuid import Cuid
-from .fields import CuidField
+from .fields import CuidField, generate_cuid_string
 from .validation import is_valid_cuid
 
 __all__ = ["CuidField", "Cuid", "is_valid_cuid"]

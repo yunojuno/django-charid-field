@@ -11,7 +11,9 @@ class Cuid:
     """
     Represent a prefixable immutable cuid.
 
-    This is the object returned by CuidField in normal use.
+    This is the object returned by CuidField in normal use, such
+    that the prefix and actual cuid of the full string value are
+    easily accessible.
 
     Instantiated with a cuid string with the optional prefix, this
     container validates the string as having the expected prefix and
@@ -19,12 +21,14 @@ class Cuid:
     """
 
     # Holds the cuid string, sans prefix.
-    cuid: str
+    cuid: str = ""
 
     # Holds the desired prefix for the ID. e.g "cus_".
     prefix: str = ""
 
     def __init__(self, value: object, *, prefix: str = ""):
+        if value is None:
+            return
 
         if not isinstance(value, str):
             raise CuidTypeMismatch(f"Value must be a string, not `{type(value)}`")
@@ -40,7 +44,7 @@ class Cuid:
             cuid = value
 
         if not is_valid_cuid(cuid):
-            raise CuidInvalid("Value does not contain a valid cuid")
+            raise CuidInvalid(f"`{cuid}` `{type(cuid)}` is not a valid cuid, prefix: `{prefix}`")
 
         # object.__setattr__ is used over simple assignment as dataclases
         # frozen=True encorces semi-fake immutability by overriding the

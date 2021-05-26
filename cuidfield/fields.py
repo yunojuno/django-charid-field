@@ -10,8 +10,8 @@ from .cuid import Cuid
 from .exceptions import CuidPrefixMismatch, CuidTypeMismatch, CuidInvalid
 
 
-def generate_prefixed_cuid(prefix: str) -> str:
-    return lambda: f"{prefix}{generate_cuid()}"
+def generate_cuid_string(prefix: str = "") -> str:
+    return f"{prefix}{generate_cuid()}"
 
 
 class CuidDescriptor(DeferredAttribute):
@@ -31,9 +31,7 @@ class CuidDescriptor(DeferredAttribute):
     """
 
     def __set__(self, instance, value):
-        # TODO(pr) Is this needed? Remove after all tests pass if unnecessary.
-        # We should keep the subclassed descriptor though so its easy to edit
-        # in future.
+        """Handle the setting of the fields value."""
         if value is None or isinstance(value, Cuid):
             instance.__dict__[self.field.name] = value
         else:
@@ -168,7 +166,12 @@ class CuidField(CharField):
 
     def get_default(self):
         """Return the prefixed default value for this field."""
-        return f"{self.prefix}{self._get_default()}"
+        default = self._get_default()
+
+        if default is None:
+            return None
+
+        return f"{self.prefix}{default}"
 
     def contribute_to_class(self, cls, name, **kwargs):
         """
