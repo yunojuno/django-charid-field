@@ -11,7 +11,6 @@ def is_valid_cuid(value: str) -> bool:
     Mirrors the current official implementation + an additional length check:
     https://github.com/ericelliott/cuid/blob/215b27bdb78d3400d4225a4eeecb3b71891a5f6f/index.js#L69
     """
-
     if not value.startswith("c"):
         return False
 

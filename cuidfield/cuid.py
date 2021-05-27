@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import NoReturn, Callable
 from dataclasses import dataclass
+from typing import Callable, NoReturn
 
 from cuid import cuid as generate_cuid
 
-from .exceptions import CuidPrefixMismatch, CuidTypeMismatch, CuidInvalid
+from .exceptions import CuidInvalid, CuidPrefixMismatch, CuidTypeMismatch
 from .validation import is_valid_cuid
 
 
@@ -29,14 +29,12 @@ class Cuid:
     """
 
     # Holds the cuid string, sans prefix.
-    cuid: str = ""
+    cuid: str
 
     # Holds the desired prefix for the ID. e.g "cus_".
     prefix: str = ""
 
     def __init__(self, value: object, *, prefix: str = ""):
-        if value is None:
-            return
 
         if not isinstance(value, str):
             raise CuidTypeMismatch(f"Value must be a string, not `{type(value)}`")

@@ -1,14 +1,15 @@
 from __future__ import annotations
+
 from typing import NoReturn
 
 from cuid import cuid as generate_cuid
 from django.core import checks, exceptions
-from django.db.models.fields import CharField, NOT_PROVIDED
-from django.utils.translation import gettext_lazy as _
+from django.db.models.fields import NOT_PROVIDED, CharField
 from django.db.models.query_utils import DeferredAttribute
+from django.utils.translation import gettext_lazy as _
 
 from .cuid import Cuid
-from .exceptions import CuidPrefixMismatch, CuidTypeMismatch, CuidInvalid
+from .exceptions import CuidInvalid, CuidPrefixMismatch, CuidTypeMismatch
 
 
 def generate_cuid_string(prefix: str = "") -> str:
