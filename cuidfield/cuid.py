@@ -22,6 +22,10 @@ class Cuid:
     container validates the string as having the expected prefix and
     being a valid cuid before holding the values separately; while also
     enabling the cycling of a cuid with ease.
+
+    NB: the dataclass is set up as `frozen` to protect against external
+    modification of internal attributes; instead callers must be use the
+    presented API.
     """
 
     # Holds the cuid string, sans prefix.
@@ -55,7 +59,8 @@ class Cuid:
         # object.__setattr__ is used over simple assignment as dataclases
         # frozen=True encorces semi-fake immutability by overriding the
         # get/set methods on the class itself. This comes with a small perf
-        # cost but it's worth it to ensure the values get treated as immutable.
+        # cost but it's worth it to ensure the values get treated as immutable
+        # -to-external-entities (see docstring for more).
         object.__setattr__(self, "cuid", cuid)
         object.__setattr__(self, "prefix", prefix)
 
@@ -63,6 +68,14 @@ class Cuid:
         return self.prefix + self.cuid
 
     def cycle(self, generator: Callable | None = None) -> NoReturn:
+        """
+        Generate a new cuid in-place, with the same prefix.
+
+        Allows for usage on a model field like:
+
+            MyModel.cuid.cycle()
+        """
+
         cuid_generator = generator or generate_cuid
         object.__setattr__(self, "cuid", cuid_generator())
 

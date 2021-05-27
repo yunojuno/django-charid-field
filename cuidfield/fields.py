@@ -37,6 +37,7 @@ class CuidDescriptor(DeferredAttribute):
         else:
             instance.__dict__[self.field.name] = Cuid(value, prefix=self.field.prefix)
 
+
 class CuidField(CharField):
     default_error_messages = {
         "invalid_type": _("“%(value)s” is not a string."),
