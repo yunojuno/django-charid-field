@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import NoReturn
 
 from cuid import cuid as generate_cuid
 from django.core import checks, exceptions
@@ -30,7 +31,7 @@ class CuidDescriptor(DeferredAttribute):
         'cus_'
     """
 
-    def __set__(self, instance, value):
+    def __set__(self, instance, value) -> NoReturn:
         """Handle the setting of the fields value."""
         if value is None or isinstance(value, Cuid):
             instance.__dict__[self.field.name] = value
@@ -55,7 +56,7 @@ class CuidField(CharField):
         default=NOT_PROVIDED,
         *args,
         **kwargs,
-    ):
+    ) -> NoReturn:
 
         # See `contribute_to_class` for true prefix setup.
         self.init_prefix = prefix
@@ -82,7 +83,7 @@ class CuidField(CharField):
 
         super().__init__(*args, **kwargs)
 
-    def get_internal_type(self):
+    def get_internal_type(self) -> str:
         return "CharField"
 
     def deconstruct(self):
@@ -98,7 +99,7 @@ class CuidField(CharField):
 
         return name, path, args, kwargs
 
-    def check(self, **kwargs):
+    def check(self, **kwargs) -> list[check.Error]:
         errors = super().check(**kwargs)
         errors.extend(self._check_prefix())
         return errors
@@ -118,7 +119,7 @@ class CuidField(CharField):
             ]
         return []
 
-    def to_python(self, value):
+    def to_python(self, value: object) -> Cuid | None:
         """Convert values to the 'Python object': the Cuid."""
         if isinstance(value, Cuid):
             return value
@@ -148,7 +149,7 @@ class CuidField(CharField):
             return value
         return Cuid(value, prefix=self.prefix)
 
-    def get_prep_value(self, value):
+    def get_prep_value(self, value: object) -> str | None:
         """Return the value prepared for use as a parameter in a query."""
         if value is None or value == "":
             return None
@@ -163,14 +164,6 @@ class CuidField(CharField):
             raise ValueError(msg % {"value": value})
 
         return str(cuid)
-
-    def generate_cuid_string(self) -> str | None:
-        default = self._get_default()
-
-        if default is None:
-            return None
-
-        return f"{self.prefix}{default}"
 
     def get_default(self) -> str | None:
         """Return the prefixed default value for this field."""

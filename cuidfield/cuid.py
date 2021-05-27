@@ -64,7 +64,7 @@ class Cuid:
         object.__setattr__(self, "cuid", cuid)
         object.__setattr__(self, "prefix", prefix)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.prefix + self.cuid
 
     def cycle(self, generator: Callable | None = None) -> NoReturn:
@@ -75,11 +75,10 @@ class Cuid:
 
             MyModel.cuid.cycle()
         """
-
         cuid_generator = generator or generate_cuid
         object.__setattr__(self, "cuid", cuid_generator())
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool:
         if other.__class__ is not self.__class__:
             return NotImplemented
 
@@ -88,7 +87,7 @@ class Cuid:
 
         return self.cuid < other.cuid
 
-    def __le__(self, other):
+    def __le__(self, other: object) -> bool:
         if other.__class__ is not self.__class__:
             return NotImplemented
 
@@ -97,7 +96,7 @@ class Cuid:
 
         return self.cuid <= other.cuid
 
-    def __gt__(self, other):
+    def __gt__(self, other: object) -> bool:
         if other.__class__ is not self.__class__:
             return NotImplemented
 
@@ -106,7 +105,7 @@ class Cuid:
 
         return self.cuid > other.cuid
 
-    def __ge__(self, other):
+    def __ge__(self, other: object) -> bool:
         if other.__class__ is not self.__class__:
             return NotImplemented
 
