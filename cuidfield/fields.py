@@ -37,7 +37,6 @@ class CuidDescriptor(DeferredAttribute):
         else:
             instance.__dict__[self.field.name] = Cuid(value, prefix=self.field.prefix)
 
-
 class CuidField(CharField):
     default_error_messages = {
         "invalid_type": _("“%(value)s” is not a string."),
@@ -164,7 +163,15 @@ class CuidField(CharField):
 
         return str(cuid)
 
-    def get_default(self):
+    def generate_cuid_string(self) -> str | None:
+        default = self._get_default()
+
+        if default is None:
+            return None
+
+        return f"{self.prefix}{default}"
+
+    def get_default(self) -> str | None:
         """Return the prefixed default value for this field."""
         default = self._get_default()
 

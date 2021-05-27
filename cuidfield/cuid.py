@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from typing import NoReturn, Callable
 from dataclasses import dataclass
+
+from cuid import cuid as generate_cuid
 
 from .exceptions import CuidPrefixMismatch, CuidTypeMismatch, CuidInvalid
 from .validation import is_valid_cuid
@@ -9,15 +12,16 @@ from .validation import is_valid_cuid
 @dataclass(eq=True, order=False, frozen=True)
 class Cuid:
     """
-    Represent a prefixable immutable cuid.
+    Represent a prefixable cuid.
 
     This is the object returned by CuidField in normal use, such
-    that the prefix and actual cuid of the full string value are
+    that the prefix and actual cuid of the full prefixed string are
     easily accessible.
 
     Instantiated with a cuid string with the optional prefix, this
     container validates the string as having the expected prefix and
-    being a valid cuid before holding the values separately.
+    being a valid cuid before holding the values separately; while also
+    enabling the cycling of a cuid with ease.
     """
 
     # Holds the cuid string, sans prefix.
@@ -44,7 +48,9 @@ class Cuid:
             cuid = value
 
         if not is_valid_cuid(cuid):
-            raise CuidInvalid(f"`{cuid}` `{type(cuid)}` is not a valid cuid, prefix: `{prefix}`")
+            raise CuidInvalid(
+                f"`{cuid}` `{type(cuid)}` is not a valid cuid, prefix: `{prefix}`"
+            )
 
         # object.__setattr__ is used over simple assignment as dataclases
         # frozen=True encorces semi-fake immutability by overriding the
@@ -55,6 +61,10 @@ class Cuid:
 
     def __str__(self):
         return self.prefix + self.cuid
+
+    def cycle(self, generator: Callable | None = None) -> NoReturn:
+        cuid_generator = generator or generate_cuid
+        object.__setattr__(self, "cuid", cuid_generator())
 
     def __lt__(self, other):
         if other.__class__ is not self.__class__:
