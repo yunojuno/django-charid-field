@@ -150,6 +150,20 @@ class TestCuidModel:
         assert len(subquery_lookup) == 2
         assert list(subquery_lookup) == [a, b]
 
+    def test_lookups__values(self):
+        values_qs = CuidModel.objects.values("id")
+        assert list(values_qs) == [
+            {"id": str(self.instance_a.id)},
+            {"id": str(self.instance_b.id)},
+        ]
+
+    def test_lookups__values_list(self):
+        values_list_qs = CuidModel.objects.values_list("id", flat=True)
+        assert list(values_list_qs) == [
+            str(self.instance_a.id),
+            str(self.instance_b.id),
+        ]
+
     def test_lookups__isnull(self):
         assert (
             CuidModel.objects.filter(nullable_cuid_with_no_default__isnull=True).count()

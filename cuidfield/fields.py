@@ -98,9 +98,7 @@ class CuidField(CharField):
         """Provide init values to serialize as part of migration freezing."""
         name, path, args, kwargs = super().deconstruct()
 
-        # Store the generated prefix so that changes to
-        # the prefix over time result in migration.
-        kwargs["prefix"] = self.prefix
+        kwargs["prefix"] = self.init_prefix
 
         return name, path, args, kwargs
 
@@ -149,12 +147,6 @@ class CuidField(CharField):
                 params={"value": value, "prefix": self.prefix},
             )
         return cuid
-
-    # def from_db_value(self, value, expression, connection) -> Cuid | None:
-    #     """Convert a value as returned by the database to a Python object."""
-    #     if value is None:
-    #         return value
-    #     return Cuid(value, prefix=self.prefix)
 
     def get_prep_value(self, value: object) -> str | None:
         """Return the value prepared for use as a parameter in a query."""
