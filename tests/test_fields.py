@@ -1,6 +1,7 @@
 import datetime
 import json
 from dataclasses import FrozenInstanceError
+from io import StringIO
 
 import pytest
 from cuid import cuid as generate_cuid
@@ -9,14 +10,11 @@ from django.core.management import call_command
 from django.core.serializers.base import DeserializationError
 from django.shortcuts import get_object_or_404
 from django.test import TestCase, override_settings
-from io import StringIO
 from pytest_django.asserts import assertJSONEqual
 
-from cuidfield import is_valid_cuid, Cuid, generate_cuid_string
-from .models import (
-    CuidModel,
-    RelatedCuidModel,
-)
+from cuidfield import Cuid, generate_cuid_string, is_valid_cuid
+
+from .models import CuidModel, RelatedCuidModel
 
 
 @pytest.mark.django_db

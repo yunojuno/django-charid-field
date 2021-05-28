@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Type, Callable
+from typing import Any, Callable, Type
 
 from cuid import cuid as generate_cuid
 from django.core import checks, exceptions
 from django.db import models
-from django.db.models.fields import NOT_PROVIDED, Field, CharField
+from django.db.models.fields import NOT_PROVIDED, CharField, Field
 from django.db.models.query_utils import DeferredAttribute
 from django.utils.translation import gettext_lazy as _
 
@@ -110,7 +110,9 @@ class CuidField(CharField):
     def _check_prefix(self) -> list[checks.Error]:
         # Types have to be ignored here because these are runtime type checks
         # that will run against 3rd-party codebases we can't possibly predict.
-        if not isinstance(self.init_prefix, str) and not callable(self.init_prefix):  # type: ignore[unreachable]
+        if not isinstance(self.init_prefix, str) and not callable(
+            self.init_prefix
+        ):  # type: ignore[unreachable]
             return [  # type: ignore [unreachable]
                 checks.Error(
                     "'prefix' keyword argument must be a string, or a callable",
@@ -159,7 +161,9 @@ class CuidField(CharField):
         try:
             cuid = Cuid(value, prefix=self.prefix)
         except ValueError as exc:
-            msg = self.error_messages[exc.error_message_type]  # type: ignore[attr-defined]
+            msg = self.error_messages[
+                exc.error_message_type
+            ]  # type: ignore[attr-defined]
             raise ValueError(msg % {"value": value})
 
         return str(cuid)
