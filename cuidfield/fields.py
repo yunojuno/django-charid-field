@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import NoReturn
-
 from cuid import cuid as generate_cuid
 from django.core import checks, exceptions
+from django.db import models
 from django.db.models.fields import NOT_PROVIDED, CharField
 from django.db.models.query_utils import DeferredAttribute
 from django.utils.translation import gettext_lazy as _
@@ -32,7 +31,7 @@ class CuidDescriptor(DeferredAttribute):
         'cus_'
     """
 
-    def __set__(self, instance, value) -> NoReturn:
+    def __set__(self, instance: models.Model, value: object) -> None:
         """Handle the setting of the fields value."""
         if value is None or isinstance(value, Cuid):
             instance.__dict__[self.field.name] = value
@@ -57,7 +56,7 @@ class CuidField(CharField):
         default=NOT_PROVIDED,
         *args,
         **kwargs,
-    ) -> NoReturn:
+    ) -> None:
 
         # See `contribute_to_class` for true prefix setup.
         self.init_prefix = prefix
@@ -100,7 +99,7 @@ class CuidField(CharField):
 
         return name, path, args, kwargs
 
-    def check(self, **kwargs) -> list[check.Error]:
+    def check(self, **kwargs) -> list[checks.Error]:
         errors = super().check(**kwargs)
         errors.extend(self._check_prefix())
         return errors
@@ -144,11 +143,11 @@ class CuidField(CharField):
             )
         return cuid
 
-    def from_db_value(self, value, expression, connection):
-        """Convert a value as returned by the database to a Python object."""
-        if value is None:
-            return value
-        return Cuid(value, prefix=self.prefix)
+    # def from_db_value(self, value, expression, connection) -> Cuid | None:
+    #     """Convert a value as returned by the database to a Python object."""
+    #     if value is None:
+    #         return value
+    #     return Cuid(value, prefix=self.prefix)
 
     def get_prep_value(self, value: object) -> str | None:
         """Return the value prepared for use as a parameter in a query."""
@@ -175,7 +174,7 @@ class CuidField(CharField):
 
         return f"{self.prefix}{default}"
 
-    def contribute_to_class(self, cls, name, **kwargs):
+    def contribute_to_class(self, cls, name, **kwargs) -> None:
         """
         Register the field with the model class it belongs to.
 

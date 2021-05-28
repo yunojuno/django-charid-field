@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, NoReturn
+from typing import Callable
 
 from cuid import cuid as generate_cuid
 
@@ -65,7 +65,7 @@ class Cuid:
     def __str__(self) -> str:
         return self.prefix + self.cuid
 
-    def cycle(self, generator: Callable | None = None) -> NoReturn:
+    def cycle(self, generator: Callable | None = None) -> None:
         """
         Generate a new cuid in-place, with the same prefix.
 
