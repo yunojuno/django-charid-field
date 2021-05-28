@@ -162,8 +162,8 @@ class CuidField(CharField):
             cuid = Cuid(value, prefix=self.prefix)
         except ValueError as exc:
             msg = self.error_messages[
-                exc.error_message_type
-            ]  # type: ignore[attr-defined]
+                exc.error_message_type  # type: ignore[attr-defined]
+            ]
             raise ValueError(msg % {"value": value})
 
         return str(cuid)
