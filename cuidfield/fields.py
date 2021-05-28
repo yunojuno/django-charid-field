@@ -98,12 +98,9 @@ class CuidField(CharField):
         """Provide init values to serialize as part of migration freezing."""
         name, path, args, kwargs = super().deconstruct()
 
-        # Store how the prefix was requested in migrations.
-        kwargs["prefix"] = self.init_prefix
-
-        # Remove `default` from the set of serialised
-        # parameters because we handle it internally.
-        del kwargs["default"]
+        # Store the generated prefix so that changes to
+        # the prefix over time result in migration.
+        kwargs["prefix"] = self.prefix
 
         return name, path, args, kwargs
 
