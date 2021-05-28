@@ -77,7 +77,7 @@ class Cuid:
         object.__setattr__(self, "cuid", cuid_generator())
 
     def __lt__(self, other: object) -> bool:
-        if other.__class__ is not self.__class__:
+        if not isinstance(other, self.__class__):
             return NotImplemented
 
         if other.prefix != self.prefix:
@@ -86,7 +86,7 @@ class Cuid:
         return self.cuid < other.cuid
 
     def __le__(self, other: object) -> bool:
-        if other.__class__ is not self.__class__:
+        if not isinstance(other, self.__class__):
             return NotImplemented
 
         if other.prefix != self.prefix:
@@ -95,7 +95,7 @@ class Cuid:
         return self.cuid <= other.cuid
 
     def __gt__(self, other: object) -> bool:
-        if other.__class__ is not self.__class__:
+        if not isinstance(other, self.__class__):
             return NotImplemented
 
         if other.prefix != self.prefix:
@@ -104,7 +104,7 @@ class Cuid:
         return self.cuid > other.cuid
 
     def __ge__(self, other: object) -> bool:
-        if other.__class__ is not self.__class__:
+        if not isinstance(other, self.__class__):
             return NotImplemented
 
         if other.prefix != self.prefix:

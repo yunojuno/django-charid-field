@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from typing import Any, Type, Callable
+
 from cuid import cuid as generate_cuid
 from django.core import checks, exceptions
 from django.db import models
-from django.db.models.fields import NOT_PROVIDED, CharField
+from django.db.models.fields import NOT_PROVIDED, Field, CharField
 from django.db.models.query_utils import DeferredAttribute
 from django.utils.translation import gettext_lazy as _
 
@@ -39,6 +41,10 @@ class CuidDescriptor(DeferredAttribute):
             instance.__dict__[self.field.name] = Cuid(value, prefix=self.field.prefix)
 
 
+# See tests.models.get_prefix_from_class_name for an example prefix generator.
+PrefixGenerator = Callable[[models.Model, Field, str], str]
+
+
 class CuidField(CharField):
     default_error_messages = {
         "invalid_type": _("“%(value)s” is not a string."),
@@ -52,10 +58,10 @@ class CuidField(CharField):
 
     def __init__(
         self,
-        prefix="",
-        default=NOT_PROVIDED,
-        *args,
-        **kwargs,
+        prefix: str = "",
+        default: PrefixGenerator | NOT_PROVIDED | None = NOT_PROVIDED,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
 
         # See `contribute_to_class` for true prefix setup.
@@ -86,7 +92,9 @@ class CuidField(CharField):
     def get_internal_type(self) -> str:
         return "CharField"
 
-    def deconstruct(self):
+    def deconstruct(
+        self,
+    ) -> tuple[str, str, list, dict]:
         """Provide init values to serialize as part of migration freezing."""
         name, path, args, kwargs = super().deconstruct()
 
@@ -99,14 +107,16 @@ class CuidField(CharField):
 
         return name, path, args, kwargs
 
-    def check(self, **kwargs) -> list[checks.Error]:
+    def check(self, **kwargs: Any) -> list[checks.CheckMessage]:
         errors = super().check(**kwargs)
         errors.extend(self._check_prefix())
         return errors
 
-    def _check_prefix(self):
-        if not isinstance(self.init_prefix, str) and not callable(self.init_prefix):
-            return [
+    def _check_prefix(self) -> list[checks.Error]:
+        # Types have to be ignored here because these are runtime type checks
+        # that will run against 3rd-party codebases we can't possibly predict.
+        if not isinstance(self.init_prefix, str) and not callable(self.init_prefix):  # type: ignore[unreachable]
+            return [  # type: ignore [unreachable]
                 checks.Error(
                     "'prefix' keyword argument must be a string, or a callable",
                     hint=(
@@ -160,7 +170,7 @@ class CuidField(CharField):
         try:
             cuid = Cuid(value, prefix=self.prefix)
         except ValueError as exc:
-            msg = self.error_messages[exc.error_message_type]  # pylint: disable=E1101
+            msg = self.error_messages[exc.error_message_type]  # type: ignore[attr-defined]
             raise ValueError(msg % {"value": value})
 
         return str(cuid)
@@ -174,7 +184,9 @@ class CuidField(CharField):
 
         return f"{self.prefix}{default}"
 
-    def contribute_to_class(self, cls, name, **kwargs) -> None:
+    def contribute_to_class(
+        self, cls: Type[models.Model], name: str, **kwargs: Any
+    ) -> None:
         """
         Register the field with the model class it belongs to.
 
