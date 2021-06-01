@@ -26,11 +26,11 @@ class TestPrefixedCuidForm:
                 "literal_prefixed_cuid": "dev_ckp6tebm500001k685ppzonod",
             },
         )
-        assert form.is_valid()
+        assert form.is_valid() is True, form.errors
         instance = form.save()
         assert instance.literal_prefixed_cuid.prefix == "dev_"
         assert instance.literal_prefixed_cuid.cuid == "ckp6tebm500001k685ppzonod"
-        assert instance.name == "Instance A - Edit"
+        assert instance.name == "Instance A"
         assert isinstance(instance.id, Cuid)
         assert CuidModel.objects.count() == 1
 
@@ -46,7 +46,7 @@ class TestPrefixedCuidForm:
             },
             instance=instance_a,
         )
-        assert form.is_valid()
+        assert form.is_valid() is True, form.errors
         instance = form.save()
         instance.refresh_from_db()
         assert instance.id == instance_a.id

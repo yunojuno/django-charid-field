@@ -26,7 +26,7 @@ def callable_test_default():
 class CuidModel(models.Model):
     """Test model designed to showcase usage as the primary key."""
 
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=20)
 
     # Showcase default primary key usage.
     id = CuidField(primary_key=True)

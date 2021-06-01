@@ -38,6 +38,7 @@ class CuidDescriptor(DeferredAttribute):
         if value is None or isinstance(value, Cuid):
             instance.__dict__[self.field.name] = value
         else:
+            # This may raise ValueError's, deliberately.
             instance.__dict__[self.field.name] = Cuid(value, prefix=self.field.prefix)
 
 
@@ -176,6 +177,10 @@ class CuidField(CharField):
             return None
 
         return f"{self.prefix}{default}"
+
+    def save_form_data(self, instance, data):
+        cuid = self.to_python(value=data)
+        setattr(instance, self.name, cuid)
 
     def contribute_to_class(
         self, cls: Type[models.Model], name: str, **kwargs: Any
