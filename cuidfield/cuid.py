@@ -76,6 +76,9 @@ class Cuid:
         cuid_generator = generator or generate_cuid
         object.__setattr__(self, "cuid", cuid_generator())
 
+    def __len__(self) -> int:
+        return len(str(self))
+
     def __lt__(self, other: object) -> bool:
         if not isinstance(other, self.__class__):
             return NotImplemented
