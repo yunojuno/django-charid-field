@@ -1,5 +1,7 @@
 # django-charid-field
 
+[![PyPI version](https://badge.fury.io/py/django-charid-field.svg)](https://badge.fury.io/py/django-charid-field)
+
 Provides a char-based, prefixable CharIDField for your Django models.
 
 It can utilise [cuid], [ksuid], [ulid] or any other string-based UID generation systems.
