@@ -12,6 +12,8 @@ USE_L10N = True
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "test.db"}}
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 INSTALLED_APPS = (
     "django.contrib.admin",
     "django.contrib.auth",
@@ -19,6 +21,7 @@ INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "tests",
 )
 
 MIDDLEWARE = [
