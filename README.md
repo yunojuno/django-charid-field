@@ -23,8 +23,9 @@ To get us a global namespace of collision-resistant IDs that:
 * are URL-safe
 * can be represented in a visual-space-efficient manor
 * are collision-resistant to allow for client side generation
+* UUID v6, v7, v8 are in RFC draft and not ready.
 
-cuid, ksuid, ulid & many others offer this, and prefixing gets us the global namespace.
+[cuid], [ksuid], [ulid] & many others offer this now, and prefixing gets us the global namespace.
 
 **Why not use integers?**
 
@@ -44,7 +45,7 @@ They solve the collision problem so why not?
 
 **Why prefix?**
 
-Because global flat namespaces are powerful. An ID now represents the instance _and it's type_, which means you can have powerful lookup abilities with just the idendifier alone. No more guessing whether `802302` is a `Dog` or a `Cat`.
+Because global flat namespaces are powerful. An ID now represents the instance _and it's type_, which means you can have powerful lookup abilities with just the identifier alone. No more guessing whether `802302` is a `Dog` or a `Cat`.
 
 ## 📗 Install
 
@@ -105,10 +106,10 @@ class Dog(models.Model):
 ### Parameters
 
 |Param|Type|Required|Default|Note|
-|-----|----|----|
-|**default**|`Callable`|❌|-|This should be a callable which generates a UID in whatever system you chose. Your callable does not have to handle prefixing, the prefix will be applied onto the front of whatever string your default callable generates. Technically not required, but without it you must handle ID generation yourself. |
-|**max_length**|`int`|❌|Set it|Controls the maximum length of the stored strings. Provide your own to match whatever ID system you pick, remembering to take into account the length of any prefixes you have configured. Also note that there is no perf/storage impact for modern Postgres so for that backend it is effectively an arbitary char limit.|
-|**primary_key**|`boolean`|✅|`False`|Set to `True` to replace Django's default `Autofield` that gets used as the primary key, else the field will be additional ID field available to the model.|
+|-----|----|--------|-------|----|
+|**default**|`Callable`|❌|-|This should be a callable which generates a UID in whatever system you chose. Your callable does not have to handle prefixing, the prefix will be applied onto the front of whatever string your default callable generates. Technically not required, but without it you must handle ID generation yourself.|
+|**max_length**|`int`|✅|Set it|Controls the maximum length of the stored strings. Provide your own to match whatever ID system you pick, remembering to take into account the length of any prefixes you have configured. Also note that there is no perf/storage impact for modern Postgres so for that backend it is effectively an arbitary char limit.|
+|**primary_key**|`boolean`|❌|`False`|Set to `True` to replace Django's default `Autofield` that gets used as the primary key, else the field will be additional ID field available to the model.|
 |**prefix**|`str | Callable` |❌|`""`|If provided, the ID strings generated as the field's default value will be prefixed. This provides a way to have a per-model prefix which can be helpful in providing a global namespace for your ID system. The prefix can be provided as a string literal (e.g `cus_`), or as a `Callable` which is run when the field is attached to the model instance and can allow for more dynamic prefixing needs. For more, see below.|
 |**unique**|`boolean`|❌|`True`|Whether the field should be treated as unique across the dataset; the field provides a sane default of `True` so that a database index is setup to protext you against collisions (whether due to chance or, more likely, a bug/human error). To turn the index off, simply pass `False`.|
 
