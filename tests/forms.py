@@ -1,15 +1,15 @@
 from django import forms
 
-from tests.models import CuidModel
+from tests.models import IDModel
 
 
-class PrefixedCuidForm(forms.ModelForm):
+class PrefixedIDForm(forms.ModelForm):
     class Meta:
-        model = CuidModel
-        fields = ("name", "literal_prefixed_cuid")
+        model = IDModel
+        fields = ("name", "literal_prefixed_id")
 
 
-class NullableCuidForm(forms.ModelForm):
+class NullableIDForm(forms.ModelForm):
     class Meta:
-        model = CuidModel
-        fields = ("name", "nullable_cuid_with_no_default")
+        model = IDModel
+        fields = ("name", "nullable_id_with_no_default")

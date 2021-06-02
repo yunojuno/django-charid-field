@@ -1,48 +1,43 @@
 import pytest
 
-from cuidfield import Cuid
-
-from .forms import PrefixedCuidForm, NullableCuidForm
-from .models import CuidModel
+from .forms import PrefixedIDForm, NullableIDForm
+from .models import IDModel
 
 
 @pytest.mark.django_db
-class TestPrefixedCuidForm:
+class TestPrefixedIDForm:
     def test_initial(self):
-        instance_a = CuidModel.objects.create(
+        instance_a = IDModel.objects.create(
             name="Instance A",
-            literal_prefixed_cuid="dev_ckp6tebm500001k685ppzonod",
+            literal_prefixed_id="dev_ckp6tebm500001k685ppzonod",
         )
-        form = PrefixedCuidForm(instance=instance_a)
-        assert form.initial["literal_prefixed_cuid"] == Cuid(
-            "dev_ckp6tebm500001k685ppzonod", prefix="dev_"
-        )
+        form = PrefixedIDForm(instance=instance_a)
+        assert form.initial["literal_prefixed_id"] == "dev_ckp6tebm500001k685ppzonod"
 
     def test_create_success(self):
-        assert CuidModel.objects.exists() is False
-        form = PrefixedCuidForm(
+        assert IDModel.objects.exists() is False
+        form = PrefixedIDForm(
             {
                 "name": "Instance A",
-                "literal_prefixed_cuid": "dev_ckp6tebm500001k685ppzonod",
+                "literal_prefixed_id": "dev_ckp6tebm500001k685ppzonod",
             },
         )
         assert form.is_valid() is True, form.errors
         instance = form.save()
-        assert instance.literal_prefixed_cuid.prefix == "dev_"
-        assert instance.literal_prefixed_cuid.cuid == "ckp6tebm500001k685ppzonod"
+        assert instance.literal_prefixed_id == "dev_ckp6tebm500001k685ppzonod"
         assert instance.name == "Instance A"
-        assert isinstance(instance.id, Cuid)
-        assert CuidModel.objects.count() == 1
+        assert isinstance(instance.id, str)
+        assert IDModel.objects.count() == 1
 
     def test_edit_success(self):
-        instance_a = CuidModel.objects.create(
+        instance_a = IDModel.objects.create(
             name="Instance A",
-            literal_prefixed_cuid="dev_ckpd1rrim000001jm8iijh07p",
+            literal_prefixed_id="dev_ckpd1rrim000001jm8iijh07p",
         )
-        form = PrefixedCuidForm(
+        form = PrefixedIDForm(
             {
                 "name": "Instance A - Edit",
-                "literal_prefixed_cuid": "dev_ckp6tebm500001k685ppzonod",
+                "literal_prefixed_id": "dev_ckp6tebm500001k685ppzonod",
             },
             instance=instance_a,
         )
@@ -50,43 +45,44 @@ class TestPrefixedCuidForm:
         instance = form.save()
         instance.refresh_from_db()
         assert instance.id == instance_a.id
-        assert instance.literal_prefixed_cuid.prefix == "dev_"
-        assert instance.literal_prefixed_cuid.cuid == "ckp6tebm500001k685ppzonod"
+        assert instance.literal_prefixed_id == "dev_ckp6tebm500001k685ppzonod"
         assert instance.name == "Instance A - Edit"
 
     def test_invalid_prefix(self):
-        form = PrefixedCuidForm(
+        form = PrefixedIDForm(
             {
                 "name": "Instance A",
-                "literal_prefixed_cuid": "cus_ckp6tebm500001k685ppzonod",
+                "literal_prefixed_id": "cus_ckp6tebm500001k685ppzonod",
             },
         )
         assert form.is_valid() is False
-        assert "literal_prefixed_cuid" in form.errors
+        assert "literal_prefixed_id" in form.errors
+        # TODO(pr) check out actual error
 
     def test_missing_field(self):
-        form = PrefixedCuidForm(
+        form = PrefixedIDForm(
             {
                 "name": "Instance A",
-                "literal_prefixed_cuid": "cus_ckp6tebm500001k685ppzonod",
+                "literal_prefixed_id": "cus_ckp6tebm500001k685ppzonod",
             },
         )
         assert form.is_valid() is False
-        assert "literal_prefixed_cuid" in form.errors
+        assert "literal_prefixed_id" in form.errors
+        # TODO(pr) check out actual error
 
     def test_required_field(self):
-        form = PrefixedCuidForm(
-            {"name": "Instance A", "literal_prefixed_cuid": None},
+        form = PrefixedIDForm(
+            {"name": "Instance A", "literal_prefixed_id": None},
         )
         assert form.is_valid() is False
-        assert "literal_prefixed_cuid" in form.errors
+        assert "literal_prefixed_id" in form.errors
 
 
 @pytest.mark.django_db
-class TestNullableCuidForm:
+class TestNullableIDForm:
     def test_blank_allowed_on_creation(self):
-        form = NullableCuidForm({"name": "Instance A"})
+        form = NullableIDForm({"name": "Instance A"})
         assert form.is_valid()
         instance = form.save()
         instance.refresh_from_db()
-        assert instance.nullable_cuid_with_no_default is None
+        assert instance.nullable_id_with_no_default is None

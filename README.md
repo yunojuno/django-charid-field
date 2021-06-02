@@ -1,59 +1,121 @@
-# django-cuidfield
+# django-charid-field
 
-Provides a CuidField for your Django models.
+Provides a char-based, prefixable CharIDField for your Django models.
 
-A [cuid](https://github.com/ericelliott/cuid) is a collision-resistant ID optimised for horizontal
-scaling and performance; it was designed by [@ericelliot](https://github.com/ericelliott).
+It can utilise [cuid], [ksuid], [ulid] or any other string-based UID generation systems.
 
-A cuid looks like this:
+It can be used as the primary key, or simple another key on your models.
 
-`cjld2cjxh0000qzrmn831i7rn`
+[cuid]: https://github.com/ericelliott/cuid
+[ksuid]: https://github.com/segmentio/ksuid
+[ulid]: https://github.com/ulid/spec
 
-and has the following properties:
+## ⛲ Feature set
 
--   fast, tiny implementation.
--   collision-free generation client or server side (horizontally scaleable).
--   can be created before insertion, avoiding db-round trips to get an id.
--   monotonically increasing, for better primary key peformance.
--   URL-safe. No need to guess whether it should be hyphenated.
--   more portable than GUID/UUID.
--   and [plenty more](https://github.com/ericelliott/cuid).
+-   Ability to work with the UID generation spec of your choice.
+-   Support for prefixing the ID on a per-model basis à la Stripe. e.g `cus_` => `cus_cjld2cjxh0000qzrmn831i7rn`
+-   Support for all database backends that support the `CharField`.
+-   Support for Python 3.9 & above only.
+## 🤷 Why?
 
-This library supports:
+To get us a global namespace of collision-resistant IDs that:
 
--   prefixing the ID on a per-model basis à la Stripe. e.g `cus_` => `cus_cjld2cjxh0000qzrmn831i7rn`
--   PostgreSQL only. It will likely work with other database backends, but we will only maintain for
-    PostgreSQL.
--   Python 3.9 & above only.
+* are URL-safe
+* can be represented in a visual-space-efficient manor
+* are collision-resistant to allow for client side generation
 
+cuid, ksuid, ulid & many others offer this, and prefixing gets us the global namespace.
+
+**Why not use integers?**
+
+* Auto-incrementing integers are easily enumerable and give away collection count.
+
+* You can solve that with HashID but then you either have to store the HashID as another column or deal with constant conversion when looking up values in your UI VS raw in your database.
+
+* Most importantly: relying on your database to generate IDs means sequential writes. Your clients are not free to generate their own IDs without a round trip to the database.
+
+**Why not use UUIDs?**
+
+They solve the collision problem so why not?
+
+* The text formats use hex, which is not visually space-efficient.
+* UUIDv4 (the one usually recommended) is completely random and thus impossible to sort. This has the known on effect of making databases work harder when looking up/indexing as binary search goes out the window.
+* Optional hyphenation when representing the hex. This nuance results in more code.
+
+**Why prefix?**
+
+Because global flat namespaces are powerful. An ID now represents the instance _and it's type_, which means you can have powerful lookup abilities with just the idendifier alone. No more guessing whether `802302` is a `Dog` or a `Cat`.
 
 ## 📗 Install
 
 Install using your favourite Python dependency manager, or straight with pip:
 
 ```
-pip install django-cuidfield
+pip install django-charid-field
 ```
+
+You'll also need to install your ID-generation library of choice (or bring your own).
+
+For example:
+
+|UID Spec|Python Library|What could it look like? (with a prefix `dev_`)|
+|--------|--------------|----------------------------------------|
+|[cuid]|cuid.py: [GH](https://github.com/necaris/cuid.py) / [PyPi](https://pypi.org/project/cuid/)|`dev_ckpffbliw000001mi3fw42vsn`|
+|[ksuid]|cyksuid: [GH](https://github.com/timonwong/cyksuid) / [PyPi](https://pypi.org/project/cyksuid/)|`dev_1tOMP4onidzvnUFuTww2UeamY39`|
+|[ulid]|python-ulid: [GH](https://github.com/mdomke/python-ulid) / [PyPi](https://pypi.org/project/python-ulid/)|`dev_01F769XGM83VR75H86ZPHKK595`|
+
+
 
 ## ✨ Usage
 
 ```
-from cuidfield import CuidField
+from charidfield import CharIDField
+```
+
+We recommend using `functool.partial` to create your own field for your codebase; this will allow you to specify your chosen ID generation and set the `max_length` parameter and then have an importable field you can use across all your models.
+
+Here's an example using the cuid spec and cuid.py:
+
+```python
+# Locate this somewhere importable
+from cuid import cuid
+from charidfield import CharIDField
+
+CuidField = partial(
+    CharIDField,
+    default=cuid,
+    max_length=30,
+    help_text="cuid-format identifier for this entity."
+)
+
+# models.py
+from wherever_you_put_it import CuidField
+
+class Dog(models.Model):
+    id = CuidField(primary_key=True, prefix="dog_")
+    name = models.CharField()
+
+# shell
+>>> dog = Dog(name="Ronnie")
+>>> dog.id
+"dog_ckpffbliw000001mi3fw42vsn"
+
 ```
 
 ### Parameters
 
-|Param|Type|Default|Note|
+|Param|Type|Required|Default|Note|
 |-----|----|----|
-|**primary_key*|`boolean`|`False`|Set to `True` to replace Django's default `Autofield` that gets used as the primary key, else the field will be additional ID field available to the model.|
-|**prefix**|`str | Callable` |`""`|If provided, the cuid strings generated as the field's default value will be prefixed. This provides a way to have a per-model prefix which can be helpful in providing a global namespace for your ID system. The prefix can be provided as a string literal (e.g `cus_`), or as a `Callable` which is run when the field is attached to the model instance and can allow for more dynamic prefixing needs. For more, see below.|
-|**default**|`Callable`|`cuid.cuid()`|By default the field is setup to generate a `cuid` to persist when a value has not been explicitly provided. This goes _against_ most Django fields which require explicitly setting a default but for this particular field we felt it made sense. If you would like to pass your own callable to generate the cuid you may do so, or pass `None` to explicitly disable any default generation of IDs which will leave the field blank on save. If you pass a default callable and the prefix parameter, the prefix will still be applied to the result of the callable default.|
-|unique|`boolean`|`True`|Whether the field should be treated as unique across the dataset; the field provides a sane default of `True` so that a database index is setup to protext you against collisions (whether due to chance or, more likely, a bug/human error). To turn the index off, simply pass `False`.|
-|`max_length`|`int`|`40`|Controls the maximum length of the stored strings. The field provides a sensible default to allow for future expansion of the cuid key size, but you may provide your own as you see fit, remembering to take into account the length of any prefixes you have configured. At this current time, the full cuids alone are 25 characters long but the spec reserves the right to increase collision-resistance in the future.|
+|**default**|`Callable`|❌|-|This should be a callable which generates a UID in whatever system you chose. Your callable does not have to handle prefixing, the prefix will be applied onto the front of whatever string your default callable generates. Technically not required, but without it you must handle ID generation yourself. |
+|**max_length**|`int`|❌|Set it|Controls the maximum length of the stored strings. Provide your own to match whatever ID system you pick, remembering to take into account the length of any prefixes you have configured. Also note that there is no perf/storage impact for modern Postgres so for that backend it is effectively an arbitary char limit.|
+|**primary_key**|`boolean`|✅|`False`|Set to `True` to replace Django's default `Autofield` that gets used as the primary key, else the field will be additional ID field available to the model.|
+|**prefix**|`str | Callable` |❌|`""`|If provided, the ID strings generated as the field's default value will be prefixed. This provides a way to have a per-model prefix which can be helpful in providing a global namespace for your ID system. The prefix can be provided as a string literal (e.g `cus_`), or as a `Callable` which is run when the field is attached to the model instance and can allow for more dynamic prefixing needs. For more, see below.|
+|**unique**|`boolean`|❌|`True`|Whether the field should be treated as unique across the dataset; the field provides a sane default of `True` so that a database index is setup to protext you against collisions (whether due to chance or, more likely, a bug/human error). To turn the index off, simply pass `False`.|
 
 All other `django.db.models.fields.CharField` keyword arguments should work as expected. See the [Django docs](https://docs.djangoproject.com/en/dev/ref/models/fields/#django.db.models.CharField).
 
 ### Usage as the Primary Key
+
 
 This will replace Django's `AutoField` and the cuid will become the main primary key
 for the entity, thus removing the default database-genererated incremental integer ID.
@@ -62,16 +124,13 @@ for the entity, thus removing the default database-genererated incremental integ
 # models/some_model.py or models.py
 
 class SomeModel(models.Model):
-    id = CuidField(primary_key=True)
+    id = CharIDField(primary_key=True, default=your_id_generator)
 
 >>> some_model = SomeModel.objects.create()
->>> str(some_model.id)
-"ckp9jm3qn001001mrg5hw3sk4"
 >>> some_model.id
-Cuid(cuid="ckp9jm3qn001001mrg5hw3sk4", prefix="")
->>> some_model.id.cuid
 "ckp9jm3qn001001mrg5hw3sk4"
->>> some_model.id.prefix
+>>> some_model.pk
+"ckp9jm3qn001001mrg5hw3sk4"
 ""
 ```
 ### Setting up prefixing
@@ -106,15 +165,11 @@ First is to set a string literal during field instantiation. E.g:
 # models.py
 
 class User(models.Model):
-    public_id = CuidField(prefix="usr_")
+    public_id = CharIDField(prefix="usr_", ...)
 
 >>> user = User.objects.create()
->>> str(user.public_id)
+>>> user.public_id
 "usr_ckp9me8zy000p01lda5579o3q"
->>> user.public_id.cuid
-"ckp9me8zy000p01lda5579o3q"
->>> user.public_id.prefix
-"usr_"
 ```
 
 Second is to pass a callable which is executed after field initialisation and during its addition to the model itself (`Field.contribute_to_class`). This allows for dynamic generation of the prefix at runtime, which is especially helpful if you've defined the field on an Abstract Django model class, as the prefix generator will be called once for every concrete model that inherits the abstract.
@@ -133,56 +188,17 @@ def get_prefix_from_class_name(
     """Return the Model's name in snake_case for use as a cuid prefix."""
     name = model_class.__name__
     # CamelCase to snake_case
-    return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower() + "_"
+    name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower() + "_"
 
 
 class UserProfile(models.Model):
-    public_id = CuidField(prefix=get_prefix_from_class_name)
+    public_id = CharIDField(prefix=get_prefix_from_class_name, ...)
 
->>> user = User.objects.create()
->>> str(user.public_id)
+>>> user_profile = UserProfile.objects.create()
+>>> user_profile.public_id
 "user_profile_ckp9me8zy000p01lda5579o3q"
->>> user.public_id.cuid
-"ckp9me8zy000p01lda5579o3q"
->>> user.public_id.prefix
-"user_profile_"
 ```
-
-### General usage
-
-The field has a descriptor set that returns a special `Cuid` object that exposes a few helpful things:
-
-* `prefix` and `cuid` attributes to make reading _just_ the cuid or prefix easier.
-* when stringified, the `Cuid` object returns the full string representation of the ID.
-
-```
->>> user.id
-Cuid(cuid="ckp9me8zy000p01lda5579o3q", prefix="usr_")
->>> str(user.id)
-"use_ckp9me8zy000p01lda5579o3q"
->>> user.id.cuid
-"ckp9me8zy000p01lda5579o3q"
->>> user.id.prefix
-"usr_"
-```
-
-* a `.cycle()` method to allow for in-place rotation (replacing) of the ID while keeping the same prefix.
-
-```
->>> user.id
-Cuid(cuid="ckp9me8zy000p01lda5579o3q", prefix="usr_")
->>> user.id.cycle()
->>> user.id
-Cuid(cuid="ckp9nrmg7000x01kv90bx83kn", prefix="usr_")
->>> user.save()
->>> user.refresh_from_db()
->>> user.id.cuid
-"ckp9nrmg7000x01kv90bx83kn"
->>> user.id.prefix
-"usr_"
-```
-
-Generally speaking, the `Cuid` and full string representation can be used in most scenarios interchangeably: ORM lookups work with both; and setting the field works with both, whilst ensuring the correct prefix has been applied.
 
 See the tests for more common usage patterns.
 ## 👩‍💻 Development
@@ -215,3 +231,7 @@ $ tox
 #### ⚙️ CI
 
 Uses GitHub Actions, see `./github/workflows`.
+
+[cuid]: https://github.com/ericelliott/cuid
+[ksuid]: https://github.com/segmentio/ksuid
+[ulid]: https://github.com/ulid/spec

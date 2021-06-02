@@ -2,60 +2,22 @@ from __future__ import annotations
 
 from typing import Any, Callable, Type
 
-from cuid import cuid as generate_cuid
 from django.core import checks, exceptions
 from django.db import models
 from django.db.models.fields import NOT_PROVIDED, CharField, Field
-from django.db.models.query_utils import DeferredAttribute
 from django.utils.translation import gettext_lazy as _
-
-from .cuid import Cuid
-from .exceptions import CuidInvalid, CuidPrefixMismatch, CuidTypeMismatch
-
-
-def generate_cuid_string(prefix: str = "") -> str:
-    return f"{prefix}{generate_cuid()}"
-
-
-class CuidDescriptor(DeferredAttribute):
-    """
-    Define a field descriptor for CuidFields on a model instance.
-
-    Returns a Cuid when accessed to enable usage like::
-
-        >>> from things import Thing
-        >>> thing = Thing.object.get(name='Square')
-        >>> str(thing.cuid_field)
-        'cus_ckodhg53j000001labr7zezao'
-        >>> thing.cuid_field.cuid
-        'ckodhg53j000001labr7zezao'
-        >>> thing.cuid_field.prefix
-        'cus_'
-    """
-
-    def __set__(self, instance: models.Model, value: object) -> None:
-        """Handle the setting of the fields value."""
-        if value is None or isinstance(value, Cuid):
-            instance.__dict__[self.field.name] = value
-        else:
-            # This may raise ValueError's, deliberately.
-            instance.__dict__[self.field.name] = Cuid(value, prefix=self.field.prefix)
-
 
 # See tests.models.get_prefix_from_class_name for an example prefix generator.
 PrefixGenerator = Callable[[models.Model, Field, str], str]
 
 
-class CuidField(CharField):
+class CharIDField(CharField):
     default_error_messages = {
         "invalid_type": _("“%(value)s” is not a string."),
-        "invalid_cuid": _("“%(value)s” does not contain a valid cuid string."),
         "invalid_prefix": _("“%(value)s” requires the prefix “%(prefix)s”."),
     }
     description = _("Collision-resistant universal identifier")
     empty_strings_allowed = False
-
-    descriptor_class = CuidDescriptor
 
     def __init__(
         self,
@@ -68,25 +30,14 @@ class CuidField(CharField):
         # See `contribute_to_class` for true prefix setup.
         self.init_prefix = prefix
 
-        # We override `default` by, err.., default so that we can get
-        # sensible usage out of the field without having to supply a
-        # default always. If you explicitly do not want a default then
-        # pass `default=None` or `default=""` depending on your case.
-        kwargs["default"] = generate_cuid if default is NOT_PROVIDED else default
+        # We only re-declare the default kwarg ourselves to give
+        # the user some type-hints to help with the creation of
+        # the callable.
+        kwargs["default"] = default
 
         # Ensure a unique index is set up by default unless the caller
         # explicitly disables it; this seems like the sane thing to do.
         kwargs.setdefault("unique", True)
-
-        # NB: 25-chars is the minimum length for a full-length cuid
-        # alone; but a) we support arbitary-length prefixes and b) the
-        # spec allows for future implementations to increase the length
-        # of the cuid. Due to this, and the fact Django requires a
-        # max_length for CharFields we set a lenient default but we
-        # recommend passing your own one in if you wish. If you're on
-        # Postgres there is no real need as there is no perf diff.
-        # between char(n), varchar(n) and text.
-        kwargs.setdefault("max_length", 40)
 
         super().__init__(*args, **kwargs)
 
@@ -122,52 +73,33 @@ class CuidField(CharField):
                         "alternatively remove the argument to disable prefixing."
                     ),
                     obj=self,
-                    id="CuidField.E001",
+                    id="CharIDField.E001",
                 )
             ]
         return []
 
-    def to_python(self, value: object) -> Cuid | None:
-        """Convert values to the 'Python object': the Cuid."""
-        if isinstance(value, Cuid):
-            return value
-
+    def to_python(self, value: object) -> str | None:
+        """Convert value to correct type, while validating."""
         if value is None:
             return value
 
-        try:
-            cuid = Cuid(value, prefix=self.prefix)
-        except (CuidTypeMismatch, CuidInvalid) as exc:
+        # We simply opt-out of dealing with non-strings as
+        # there is no sane way to convert every type.
+        if not isinstance(value, str):
             raise exceptions.ValidationError(
-                self.error_messages[exc.error_message_type],
-                code=exc.error_message_type,
+                self.error_messages["invalid_type"],
+                code="invalid_type",
                 params={"value": value},
             )
-        except CuidPrefixMismatch as exc:
+
+        if self.prefix and not value.startswith(self.prefix):
             raise exceptions.ValidationError(
-                self.error_messages[exc.error_message_type],
-                code=exc.error_message_type,
+                self.error_messages["invalid_prefix"],
+                code="invalid_prefix",
                 params={"value": value, "prefix": self.prefix},
             )
-        return cuid
 
-    def get_prep_value(self, value: object) -> str | None:
-        """Return the value prepared for use as a parameter in a query."""
-        if value is None or value == "":
-            return None
-
-        if isinstance(value, Cuid):
-            return str(value)
-
-        try:
-            cuid = Cuid(value, prefix=self.prefix)
-        except ValueError as exc:
-            msg = self.error_messages[
-                exc.error_message_type  # type: ignore[attr-defined]
-            ]
-            raise ValueError(msg % {"value": value})
-
-        return str(cuid)
+        return value
 
     def get_default(self) -> str | None:
         """Return the prefixed default value for this field."""
@@ -177,10 +109,6 @@ class CuidField(CharField):
             return None
 
         return f"{self.prefix}{default}"
-
-    def save_form_data(self, instance, data):
-        cuid = self.to_python(value=data)
-        setattr(instance, self.name, cuid)
 
     def contribute_to_class(
         self, cls: Type[models.Model], name: str, **kwargs: Any
@@ -195,7 +123,7 @@ class CuidField(CharField):
         In our case, this is the first time we have access to the model that
         requested this field and thus we can pass it to the prefix callable
         (if it was supplied as one) allowing it to generate a prefix based on
-        model attributes/meta.
+        model attributes or other meta.
         """
         if callable(self.init_prefix):
             self.prefix = self.init_prefix(

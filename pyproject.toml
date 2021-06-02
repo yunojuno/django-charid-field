@@ -1,14 +1,14 @@
 [tool.poetry]
-name = "django-cuidfield"
+name = "django-charid-field"
 version = "0.1.0"
-description = "Provides a cuid-generating field for your Django models."
+description = "Provides a char-based, prefixable ID field for your Django models. Supports cuid, ksuid, ulid, et al."
 license = "MIT"
 authors = ["YunoJuno <code@yunojuno.com>"]
 maintainers = ["YunoJuno <code@yunojuno.com>"]
 readme = "README.md"
-homepage = "https://github.com/yunojuno/django-cuidfield"
-repository = "https://github.com/yunojuno/django-cuidfield"
-documentation = "https://github.com/yunojuno/django-cuidfield"
+homepage = "https://github.com/yunojuno/django-charid-field"
+repository = "https://github.com/yunojuno/django-charid-idfield"
+documentation = "https://github.com/yunojuno/django-charid-idfield"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Web Environment",
@@ -21,12 +21,11 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
 ]
-packages = [{ include = "cuidfield" }]
+packages = [{ include = "charidfield" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 django = "^3.1"
-cuid = "^0.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
