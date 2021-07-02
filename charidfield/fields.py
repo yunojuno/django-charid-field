@@ -99,12 +99,3 @@ class CharIDField(CharField):
             )
 
         return super().validate(value, model_instance)
-
-    #def get_default(self) -> str | None:
-    #    """Return the prefixed default value for this field."""
-    #    default = self._get_default()
-
-    #    if default is None:
-    #        return None
-
-    #    return f"{self.prefix}{default}"
