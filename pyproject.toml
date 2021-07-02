@@ -6,9 +6,8 @@ license = "MIT"
 authors = ["YunoJuno <code@yunojuno.com>"]
 maintainers = ["YunoJuno <code@yunojuno.com>"]
 readme = "README.md"
-homepage = "https://github.com/yunojuno/django-charid-field"
-repository = "https://github.com/yunojuno/django-charid-idfield"
-documentation = "https://github.com/yunojuno/django-charid-idfield"
+repository = "https://github.com/yunojuno/django-charid-field"
+documentation = "https://github.com/yunojuno/django-charid-field/blob/master/README.md"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Web Environment",

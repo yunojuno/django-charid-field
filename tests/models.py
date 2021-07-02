@@ -1,29 +1,9 @@
-import re
-
 from django.db import models
-from django.db.models.fields import Field
 from functools import partial
 
 from charidfield import CharIDField
 
 from .helpers import generate_test_uid
-
-
-def get_prefix_from_class_name(
-    *,
-    model_class: models.Model,
-    field_instance: Field,
-    field_name: str,
-) -> str:
-    """Return the Model's name in snake_case for use as an ID prefix."""
-    name = model_class.__name__
-    # CamelCase to snake_case
-    name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
-    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower() + "_"
-
-
-def callable_test_default():
-    return f"{generate_test_uid()}_some_suffix"
 
 
 # To show off the recommended partial-usage; in production code you would
@@ -49,10 +29,7 @@ class IDModel(models.Model):
     default_id = TestUIDField()
 
     # Showcase with a literal string prefix, with in-built default.
-    literal_prefixed_id = TestUIDField(prefix="dev_")
-
-    # Showcase with a callable string prefix, with in-built default.
-    callable_prefixed_id = TestUIDField(prefix=get_prefix_from_class_name)
+    prefixed_id = TestUIDField(prefix="dev_")
 
     # Showcase a nullable field, and overriding to have no default.
     nullable_id_with_no_default = TestUIDField(null=True, default=None, blank=True)

@@ -4,6 +4,8 @@ from io import StringIO
 import pytest
 from django.core.management import call_command
 from django.core.serializers.base import DeserializationError
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 
 from .models import IDModel, RelatedIDModel
 from .helpers import TEST_UID_REGEX, generate_test_uid
@@ -22,19 +24,16 @@ class TestIDModel:
 
         assert isinstance(self.instance_a.id, str)
         assert isinstance(self.instance_a.default_id, str)
-        assert isinstance(self.instance_a.literal_prefixed_id, str)
-        assert isinstance(self.instance_a.callable_prefixed_id, str)
+        assert isinstance(self.instance_a.prefixed_id, str)
         assert self.instance_a.nullable_id_with_no_default is None
         assert isinstance(self.instance_a.no_index_id, str)
 
         assert TEST_UID_REGEX.match(self.instance_a.id)
         assert TEST_UID_REGEX.match(self.instance_a.default_id)
-        assert TEST_UID_REGEX.match(self.instance_a.literal_prefixed_id)
-        assert TEST_UID_REGEX.match(self.instance_a.callable_prefixed_id)
+        assert TEST_UID_REGEX.match(self.instance_a.prefixed_id)
         assert TEST_UID_REGEX.match(self.instance_a.no_index_id)
 
-        assert self.instance_a.literal_prefixed_id.startswith("dev_")
-        assert self.instance_a.callable_prefixed_id.startswith("id_model_")
+        assert self.instance_a.prefixed_id.startswith("dev_")
 
     def test_ordering_by_id(self):
         asc_queryset = IDModel.objects.all().order_by("id")
@@ -52,14 +51,13 @@ class TestIDModel:
                     [
                         self.instance_a.id,
                         self.instance_a.default_id,
-                        self.instance_a.literal_prefixed_id,
-                        self.instance_a.callable_prefixed_id,
+                        self.instance_a.prefixed_id,
                         self.instance_a.nullable_id_with_no_default,
                         self.instance_a.no_index_id,
                     ]
                 )
             )
-            == 6
+            == 5
         )
 
     @pytest.mark.parametrize(
@@ -68,8 +66,7 @@ class TestIDModel:
             ("id", "id"),
             ("id", "pk"),
             ("default_id", "default_id"),
-            ("literal_prefixed_id", "literal_prefixed_id"),
-            ("callable_prefixed_id", "callable_prefixed_id"),
+            ("prefixed_id", "prefixed_id"),
             ("no_index_id", "no_index_id"),
         ),
     )
@@ -150,10 +147,6 @@ class TestIDModel:
         c = IDModel.objects.create(name="Record C")
         base_queryset = IDModel.objects.filter(name__icontains="Record")
 
-        print(a.id)
-        print(b.id)
-        print(c.id)
-
         gt_queryset = base_queryset.filter(id__gt=b.id).order_by("id")
         assert list(gt_queryset) == [c]
 
@@ -174,7 +167,25 @@ class TestIDModel:
 
         instance, created = IDModel.objects.get_or_create(name="Instance D")
         assert isinstance(instance, IDModel)
+        # Ensure only one can be returned.
+        assert IDModel.objects.get(id=instance.id)
         assert created is True
+
+    def test_get_object_or_404__when_found__no_prefix(self):
+        instance_a = get_object_or_404(IDModel, id=self.instance_a.id)
+        assert instance_a == self.instance_a
+
+    def test_get_object_or_404__when_not_found__no_prefix(self):
+        with pytest.raises(Http404):
+            get_object_or_404(IDModel, id="does_not_exist")
+
+    def test_get_object_or_404__when_found__with_prefix(self):
+        instance_a = get_object_or_404(IDModel, prefixed_id=self.instance_a.prefixed_id)
+        assert instance_a == self.instance_a
+
+    def test_get_object_or_404__when_not_found__with_prefix(self):
+        with pytest.raises(Http404):
+            get_object_or_404(IDModel, prefixed_id="does_not_exist")
 
     def test_setting_primary_key(self):
         old_id = self.instance_a.id
@@ -189,8 +200,7 @@ class TestIDModel:
         # must cycle the id fields with a unique index, as otherwise the new
         # object will not persist.
         self.instance_a.default_id = generate_test_uid()
-        self.instance_a.literal_prefixed_id = generate_test_uid(prefix="dev_")
-        self.instance_a.callable_prefixed_id = generate_test_uid(prefix="id_model_")
+        self.instance_a.prefixed_id = generate_test_uid(prefix="dev_")
         self.instance_a.save()
         self.instance_a.refresh_from_db()
         assert self.instance_a.id == new_id
@@ -201,8 +211,7 @@ class TestIDModel:
         "model_field_name",
         (
             "default_id",
-            "literal_prefixed_id",
-            "callable_prefixed_id",
+            "prefixed_id",
             "nullable_id_with_no_default",
             "no_index_id",
         ),
@@ -255,8 +264,7 @@ class TestIDModel:
                 "fields": {
                     "name": "Instance A",
                     "default_id": self.instance_a.default_id,
-                    "literal_prefixed_id": self.instance_a.literal_prefixed_id,
-                    "callable_prefixed_id": self.instance_a.callable_prefixed_id,
+                    "prefixed_id": self.instance_a.prefixed_id,
                     "nullable_id_with_no_default": None,
                     "no_index_id": self.instance_a.no_index_id,
                 },
@@ -267,34 +275,18 @@ class TestIDModel:
                 "fields": {
                     "name": "Instance B",
                     "default_id": self.instance_b.default_id,
-                    "literal_prefixed_id": self.instance_b.literal_prefixed_id,
-                    "callable_prefixed_id": self.instance_b.callable_prefixed_id,
+                    "prefixed_id": self.instance_b.prefixed_id,
                     "nullable_id_with_no_default": None,
                     "no_index_id": self.instance_b.no_index_id,
                 },
             },
         ]
 
-    def test_loaddata__with_valid_input(self):
+    def test_loaddata(self):
         out = StringIO()
-        call_command("loaddata", "idmodels_valid", stdout=out)
+        call_command("loaddata", "idmodels", stdout=out)
         assert out.getvalue().strip() == "Installed 2 object(s) from 1 fixture(s)"
         instance_a = IDModel.objects.get(pk="ckp6tebm500001k685ppzonod")
         instance_b = IDModel.objects.get(pk="ckp6tebm600061k68mrl86aei")
         assert instance_a.name == "Instance A"
         assert instance_b.name == "Instance B"
-
-    def test_loaddata__with_invalid_input(self):
-        """
-        Ensure that data that doesn't pass field validation fails to import.
-        In particular, if a different key prefix is expected, ensure it raises.
-        """
-        out = StringIO()
-        with pytest.raises(DeserializationError):
-            call_command("loaddata", "idmodels_invalid", stdout=out)
-
-        # Ensure neither entity were inserted, even though only Instance B is invalid.
-        instance_a = IDModel.objects.filter(pk="ckp6tebm500001k685ppzonod").first()
-        assert instance_a is None
-        instance_b = IDModel.objects.filter(pk="ckp6tebm600061k68mrl86aei").first()
-        assert instance_b is None

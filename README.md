@@ -109,10 +109,10 @@ class Dog(models.Model):
 
 |Param|Type|Required|Default|Note|
 |-----|----|--------|-------|----|
-|**default**|`Callable`|❌|-|This should be a callable which generates a UID in whatever system you chose. Your callable does not have to handle prefixing, the prefix will be applied onto the front of whatever string your default callable generates. Technically not required, but without it you must handle ID generation yourself.|
+|**default**|`Callable`|❌|-|This should be a callable which generates a UID in whatever system you chose. Your callable does not have to handle prefixing, the prefix will be applied onto the front of whatever string your default callable generates. Technically not required, but without it you will get blank fields and must handle ID generation yourself.|
+|**prefix**|`str` |❌|`""`|If provided, the ID strings generated as the field's default value will be prefixed. This provides a way to have a per-model prefix which can be helpful in providing a global namespace for your ID system. The prefix should be provided as a string literal (e.g `cus_`). For more, see below.|
 |**max_length**|`int`|✅|Set it|Controls the maximum length of the stored strings. Provide your own to match whatever ID system you pick, remembering to take into account the length of any prefixes you have configured. Also note that there is no perf/storage impact for modern Postgres so for that backend it is effectively an arbitary char limit.|
 |**primary_key**|`boolean`|❌|`False`|Set to `True` to replace Django's default `Autofield` that gets used as the primary key, else the field will be additional ID field available to the model.|
-|**prefix**|`str or Callable` |❌|`""`|If provided, the ID strings generated as the field's default value will be prefixed. This provides a way to have a per-model prefix which can be helpful in providing a global namespace for your ID system. The prefix can be provided as a string literal (e.g `cus_`), or as a `Callable` which is run when the field is attached to the model instance and can allow for more dynamic prefixing needs. For more, see below.|
 |**unique**|`boolean`|❌|`True`|Whether the field should be treated as unique across the dataset; the field provides a sane default of `True` so that a database index is setup to protext you against collisions (whether due to chance or, more likely, a bug/human error). To turn the index off, simply pass `False`.|
 
 All other `django.db.models.fields.CharField` keyword arguments should work as expected. See the [Django docs](https://docs.djangoproject.com/en/dev/ref/models/fields/#django.db.models.CharField).
@@ -160,9 +160,7 @@ This may sound familiar, as it's how [Stripe](http://stripe.com/) handle their p
 
 #### How?
 
-Two options.
-
-First is to set a string literal during field instantiation. E.g:
+Set a string literal during field instantiation. E.g:
 
 ```python
 # models.py
@@ -174,36 +172,6 @@ class User(models.Model):
 >>> user.public_id
 "usr_ckp9me8zy000p01lda5579o3q"
 ```
-
-Second is to pass a callable which is executed after field initialisation and during its addition to the model itself (`Field.contribute_to_class`). This allows for dynamic generation of the prefix at runtime, which is especially helpful if you've defined the field on an Abstract Django model class, as the prefix generator will be called once for every concrete model that inherits the abstract.
-
-The callable should accept `model_class: models.Model` (the model the field is being added to), `field_instance: django.db.models.Field` (the field instance being added) & `field_name: str` (the name of the field on the model). E.g:
-
-```python
-# models.py
-
-def get_prefix_from_class_name(
-    *,
-    model_class: models.Model,
-    field_instance: Field,
-    field_name: str,
-) -> str:
-    """Return the Model's name in snake_case for use as a cuid prefix."""
-    name = model_class.__name__
-    # CamelCase to snake_case
-    name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower() + "_"
-
-
-class UserProfile(models.Model):
-    public_id = CharIDField(prefix=get_prefix_from_class_name, ...)
-
->>> user_profile = UserProfile.objects.create()
->>> user_profile.public_id
-"user_profile_ckp9me8zy000p01lda5579o3q"
-```
-
-See the tests for more common usage patterns.
 ## 👩‍💻 Development
 
 ### 🏗️ Local environment
