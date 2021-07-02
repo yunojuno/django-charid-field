@@ -81,8 +81,12 @@ class CharIDField(CharField):
         return []
 
     def validate(self, value: object, model_instance: models.Model):
-        """Validate the fields value, called from .clean() on parent."""
+        """
+        Validate the fields value is a string & prefixed correctly.
 
+        Called from .clean() on parent.
+
+        """
         # No non-string types.
         if not isinstance(value, str):
             raise exceptions.ValidationError(
