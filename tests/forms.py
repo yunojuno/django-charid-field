@@ -12,4 +12,4 @@ class PrefixedIDForm(forms.ModelForm):
 class NullableIDForm(forms.ModelForm):
     class Meta:
         model = IDModel
-        fields = ("name", "nullable_id_with_no_default")
+        fields = ("name", "null_id_with_no_default")

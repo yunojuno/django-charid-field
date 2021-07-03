@@ -6,7 +6,6 @@ from .models import IDModel
 
 @pytest.mark.django_db
 class TestPrefixedIDForm:
-
     def test_initial__without_instance(self):
         form = PrefixedIDForm()
         assert form["prefixed_id"].value().startswith("dev_")
@@ -97,4 +96,4 @@ class TestNullableIDForm:
         assert form.is_valid()
         instance = form.save()
         instance.refresh_from_db()
-        assert instance.nullable_id_with_no_default is None
+        assert instance.null_id_with_no_default is None

@@ -32,10 +32,21 @@ class IDModel(models.Model):
     prefixed_id = TestUIDField(prefix="dev_")
 
     # Showcase a nullable field, and overriding to have no default.
-    nullable_id_with_no_default = TestUIDField(null=True, default=None, blank=True)
+    null_id_with_no_default = TestUIDField(null=True, default=None, blank=True)
+
+    # Showcase a blankable but not null field; while also showcasing
+    # a field where a default is not provided at all (not just None).
+    not_null_id_but_blank = CharIDField(max_length=30, blank=True, unique=False)
 
     # Showcase the default field but without an index.
     no_index_id = TestUIDField(unique=False)
+
+    # Showcase with a static default + a prefix. This is very much an edge
+    # case as I can't think of a good reason to ever want a static default
+    # for an ID field, but given you can call it like this: we should test it.
+    prefixed_and_non_callable_default_id = TestUIDField(
+        prefix="test_", default="abcde", unique=False
+    )
 
     def __str__(self):
         return f"[{self.id}] {self.name}"

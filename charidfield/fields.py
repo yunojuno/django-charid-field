@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any, Callable, NoReturn
 
 from django.core import checks, exceptions
 from django.db import models
@@ -10,32 +10,33 @@ from django.utils.translation import gettext_lazy as _
 
 def prefixed_default(default: Callable | str, *, prefix: str) -> Callable:
     if callable(default):
-        return lambda: f"{prefix}{default()}"
+        return lambda: f"{prefix}{default()}"  # type: ignore[operator]
     else:
         return lambda: f"{prefix}{default}"
 
 
 class CharIDField(CharField):
     default_error_messages = {
-        "invalid_type": _("The value must be text"),
+        "invalid_type": _("The value must be text."),
         "invalid_prefix": _("“%(value)s” requires the prefix “%(prefix)s”."),
     }
     description = _("Collision-resistant universal identifier")
-    empty_strings_allowed = False
 
     def __init__(
         self,
         prefix: str = "",
-        default: Callable | NOT_PROVIDED | None = NOT_PROVIDED,
+        default: Callable | str | NOT_PROVIDED | None = NOT_PROVIDED,
         *args: Any,
         **kwargs: Any,
     ) -> None:
 
         self.prefix = prefix
 
-        if self.prefix:
+        if self.prefix and default not in (NOT_PROVIDED, None):
             # We wrap the default passed in so that we can apply the prefix.
-            kwargs["default"] = prefixed_default(default, prefix=prefix)
+            kwargs["default"] = prefixed_default(
+                default, prefix=self.prefix  # type: ignore[arg-type]
+            )
         else:
             kwargs["default"] = default
 
@@ -66,7 +67,7 @@ class CharIDField(CharField):
     def _check_prefix(self) -> list[checks.Error]:
         # Types have to be ignored here because these are runtime type checks
         # that will run against 3rd-party codebases we can't possibly predict.
-        if not isinstance(self.prefix, str):  # type: ignore[unreachable]
+        if not isinstance(self.prefix, str):
             return [  # type: ignore [unreachable]
                 checks.Error(
                     "'prefix' keyword argument must be a string",
@@ -80,7 +81,7 @@ class CharIDField(CharField):
             ]
         return []
 
-    def validate(self, value: object, model_instance: models.Model):
+    def validate(self, value: object, model_instance: models.Model) -> None | NoReturn:
         """
         Validate the fields value is a string & prefixed correctly.
 

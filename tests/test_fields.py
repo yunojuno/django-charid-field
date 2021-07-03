@@ -25,8 +25,10 @@ class TestIDModel:
         assert isinstance(self.instance_a.id, str)
         assert isinstance(self.instance_a.default_id, str)
         assert isinstance(self.instance_a.prefixed_id, str)
-        assert self.instance_a.nullable_id_with_no_default is None
+        assert self.instance_a.null_id_with_no_default is None
+        assert self.instance_a.not_null_id_but_blank == ""
         assert isinstance(self.instance_a.no_index_id, str)
+        assert isinstance(self.instance_a.prefixed_and_non_callable_default_id, str)
 
         assert TEST_UID_REGEX.match(self.instance_a.id)
         assert TEST_UID_REGEX.match(self.instance_a.default_id)
@@ -34,6 +36,7 @@ class TestIDModel:
         assert TEST_UID_REGEX.match(self.instance_a.no_index_id)
 
         assert self.instance_a.prefixed_id.startswith("dev_")
+        assert self.instance_a.prefixed_and_non_callable_default_id == "test_abcde"
 
     def test_ordering_by_id(self):
         asc_queryset = IDModel.objects.all().order_by("id")
@@ -52,12 +55,13 @@ class TestIDModel:
                         self.instance_a.id,
                         self.instance_a.default_id,
                         self.instance_a.prefixed_id,
-                        self.instance_a.nullable_id_with_no_default,
+                        self.instance_a.null_id_with_no_default,
                         self.instance_a.no_index_id,
+                        self.instance_a.prefixed_and_non_callable_default_id,
                     ]
                 )
             )
-            == 5
+            == 6
         )
 
     @pytest.mark.parametrize(
@@ -108,6 +112,14 @@ class TestIDModel:
         queryset = IDModel.objects.filter(**lookup_filter)
         assert list(queryset) == [self.instance_a]
 
+    def test_lookups__with_empty_string(self):
+        qs = IDModel.objects.filter(not_null_id_but_blank="")
+        assert list(qs) == [self.instance_a, self.instance_b]
+
+    def test_lookups__with_none(self):
+        qs = IDModel.objects.filter(null_id_with_no_default=None)
+        assert list(qs) == [self.instance_a, self.instance_b]
+
     def test_lookups__subqueries(self):
         a = IDModel.objects.create(name="Record A")
         b = IDModel.objects.create(name="Record B")
@@ -135,10 +147,7 @@ class TestIDModel:
         ]
 
     def test_lookups__isnull(self):
-        assert (
-            IDModel.objects.filter(nullable_id_with_no_default__isnull=True).count()
-            == 2
-        )
+        assert IDModel.objects.filter(null_id_with_no_default__isnull=True).count() == 2
         assert IDModel.objects.filter(id__isnull=False).count() == 2
 
     def test_lookups__gt_lt(self):
@@ -212,7 +221,7 @@ class TestIDModel:
         (
             "default_id",
             "prefixed_id",
-            "nullable_id_with_no_default",
+            "null_id_with_no_default",
             "no_index_id",
         ),
     )
@@ -265,8 +274,10 @@ class TestIDModel:
                     "name": "Instance A",
                     "default_id": self.instance_a.default_id,
                     "prefixed_id": self.instance_a.prefixed_id,
-                    "nullable_id_with_no_default": None,
+                    "null_id_with_no_default": None,
+                    "not_null_id_but_blank": "",
                     "no_index_id": self.instance_a.no_index_id,
+                    "prefixed_and_non_callable_default_id": "test_abcde",
                 },
             },
             {
@@ -276,8 +287,10 @@ class TestIDModel:
                     "name": "Instance B",
                     "default_id": self.instance_b.default_id,
                     "prefixed_id": self.instance_b.prefixed_id,
-                    "nullable_id_with_no_default": None,
+                    "null_id_with_no_default": None,
+                    "not_null_id_but_blank": "",
                     "no_index_id": self.instance_b.no_index_id,
+                    "prefixed_and_non_callable_default_id": "test_abcde",
                 },
             },
         ]

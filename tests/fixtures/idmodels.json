@@ -6,7 +6,7 @@
             "name": "Instance A",
             "default_id": "ckp6tebm500011k6865mtpo46",
             "prefixed_id": "dev_ckp6tebm500021k68gnelj6zu",
-            "nullable_id_with_no_default": null,
+            "null_id_with_no_default": null,
             "no_index_id": "ckp6tebm500051k68mw7z596o"
         }
     },
@@ -17,7 +17,7 @@
             "name": "Instance B",
             "default_id": "ckp6tebm600071k68uc0f2e6k",
             "prefixed_id": "dev_ckp6tebm600081k68sugadbry",
-            "nullable_id_with_no_default": null,
+            "null_id_with_no_default": null,
             "no_index_id": "ckp6tebm6000b1k688jx8dw9b"
         }
     }
