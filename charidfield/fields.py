@@ -32,6 +32,8 @@ class CharIDField(CharField):
 
         self.prefix = prefix
 
+        self.init_default = default
+
         if self.prefix and default not in (NOT_PROVIDED, None):
             # We wrap the default passed in so that we can apply the prefix.
             kwargs["default"] = prefixed_default(
@@ -56,6 +58,7 @@ class CharIDField(CharField):
         name, path, args, kwargs = super().deconstruct()
 
         kwargs["prefix"] = self.prefix
+        kwargs["default"] = self.init_default
 
         return name, path, args, kwargs
 
