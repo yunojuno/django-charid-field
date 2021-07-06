@@ -25,7 +25,7 @@ To get us a global namespace of collision-resistant IDs that:
 * are URL-safe
 * can be represented in a visual-space-efficient manor
 * are collision-resistant to allow for client side generation
-* UUID v6, v7, v8 are in RFC draft and not ready.
+* exist now. UUID v6, v7, v8 are in RFC draft and not ready (Jul '21).
 
 [cuid], [ksuid], [ulid] & many others offer this now, and prefixing gets us the global namespace.
 
