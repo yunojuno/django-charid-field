@@ -42,7 +42,7 @@ To get us a global namespace of collision-resistant IDs that:
 They solve the collision problem so why not?
 
 * The text formats use hex, which is not visually space-efficient.
-* UUIDv4 (the one usually recommended) is completely random and thus impossible to sort. This has the known on effect of making databases work harder when looking up/indexing as binary search goes out the window.
+* UUIDv4 (the one usually recommended) is completely random and thus impossible to sort. This has the knock on effect of making databases work harder when looking up/indexing as binary search goes out the window.
 * Optional hyphenation when representing the hex. This nuance results in more code.
 
 **Why prefix?**
