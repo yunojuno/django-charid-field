@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-charid-field"
-version = "0.2.1"
+version = "0.2.2"
 description = "Provides a char-based, prefixable ID field for your Django models. Supports cuid, ksuid, ulid, et al."
 license = "MIT"
 authors = ["YunoJuno <code@yunojuno.com>"]
@@ -24,7 +24,7 @@ packages = [{ include = "charidfield" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-django = "^3.1"
+django = "^3.1 || ^4.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
