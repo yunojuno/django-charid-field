@@ -1,0 +1,9 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+# v3.0
+
+- Adds support for Python 3.10 and 3.11
+- Adds support for Django 4.0 and 4.1
+- Drops support for Django 3.1
