@@ -4,11 +4,11 @@
 
 Provides a char-based, prefixable CharIDField for your Django models.
 
-It can utilise [cuid], [ksuid], [ulid] or any other string-based UID generation systems.
+It can utilise [cuid2], [ksuid], [ulid] or any other string-based UID generation systems.
 
 It can be used as the primary key, or simple another key on your models.
 
-[cuid]: https://github.com/ericelliott/cuid
+[cuid2]: https://github.com/gordon-code/cuid2
 [ksuid]: https://github.com/segmentio/ksuid
 [ulid]: https://github.com/ulid/spec
 
@@ -27,7 +27,7 @@ To get us a global namespace of collision-resistant IDs that:
 * are collision-resistant to allow for client side generation
 * exist now. UUID v6, v7, v8 are in RFC draft and not ready (Jul '21).
 
-[cuid], [ksuid], [ulid] & many others offer this now, and prefixing gets us the global namespace.
+[cuid2], [ksuid], [ulid] & many others offer this now, and prefixing gets us the global namespace.
 
 **Why not use integers?**
 
@@ -63,7 +63,7 @@ For example:
 
 |UID Spec|Python Library|What could it look like? (with a prefix `dev_`)|
 |--------|--------------|----------------------------------------|
-|[cuid]|cuid.py: [GH](https://github.com/necaris/cuid.py) / [PyPi](https://pypi.org/project/cuid/)|`dev_ckpffbliw000001mi3fw42vsn`|
+|[cuid2]|cuid2: [GH](https://github.com/gordon-code/cuid2) / [PyPi](https://pypi.org/project/cuid2/)|`dev_kd4ise6x0ya2k7vzvfo9wy11`|
 |[ksuid]|cyksuid: [GH](https://github.com/timonwong/cyksuid) / [PyPi](https://pypi.org/project/cyksuid/)|`dev_1tOMP4onidzvnUFuTww2UeamY39`|
 |[ulid]|python-ulid: [GH](https://github.com/mdomke/python-ulid) / [PyPi](https://pypi.org/project/python-ulid/)|`dev_01F769XGM83VR75H86ZPHKK595`|
 
@@ -77,18 +77,20 @@ from charidfield import CharIDField
 
 We recommend using `functool.partial` to create your own field for your codebase; this will allow you to specify your chosen ID generation and set the `max_length` parameter and then have an importable field you can use across all your models.
 
-Here's an example using the cuid spec and cuid.py:
+Here's an example using the cuid2 spec and cuid2:
 
 ```python
 # Locate this somewhere importable
-from cuid import cuid
+from cuid2 import cuid_wrapper
 from charidfield import CharIDField
+
+cuid_generator = cuid_wrapper()
 
 CuidField = partial(
     CharIDField,
-    default=cuid,
+    default=cuid_generator,
     max_length=30,
-    help_text="cuid-format identifier for this entity."
+    help_text="cuid2-format identifier for this entity."
 )
 
 # models.py
@@ -101,7 +103,7 @@ class Dog(models.Model):
 # shell
 >>> dog = Dog(name="Ronnie")
 >>> dog.id
-"dog_ckpffbliw000001mi3fw42vsn"
+"dog_uxus9zkf8jh04eg4msbd6rx1"
 
 ```
 
@@ -131,9 +133,9 @@ class SomeModel(models.Model):
 
 >>> some_model = SomeModel.objects.create()
 >>> some_model.id
-"ckp9jm3qn001001mrg5hw3sk4"
+"w23tf1c05qj8whlow2ncudn8"
 >>> some_model.pk
-"ckp9jm3qn001001mrg5hw3sk4"
+"yyh91r8dy97ija9wq3m3ocaa"
 ""
 ```
 ### Setting up prefixing
@@ -143,9 +145,9 @@ class SomeModel(models.Model):
 Prefixing allows per-entity ID namespacing, e.g:
 
 ```
-cus_ckp9mdxpd000i01ld6gzjgyl4 (reference a specific customer)
-usr_ckp9me8zy000p01lda5579o3q (reference a specific user)
-org_ckp9mek2d000s01ld8ffhhvd3 (reference a specific organisation)
+cus_b2a9e3rbjl28xusdrij3xvru (reference a specific customer)
+usr_p2u6eqviavjpri9q8svtpjy6 (reference a specific user)
+org_yat7xp4tgln861q0wtkgzhyd (reference a specific organisation)
 ```
 
 #### Why?
@@ -170,7 +172,7 @@ class User(models.Model):
 
 >>> user = User.objects.create()
 >>> user.public_id
-"usr_ckp9me8zy000p01lda5579o3q"
+"usr_q9qyw2l11if3cc3i2io8e464"
 ```
 ## 👩‍💻 Development
 
@@ -203,6 +205,6 @@ $ tox
 
 Uses GitHub Actions, see `./github/workflows`.
 
-[cuid]: https://github.com/ericelliott/cuid
+[cuid2]: https://github.com/gordon-code/cuid2
 [ksuid]: https://github.com/segmentio/ksuid
 [ulid]: https://github.com/ulid/spec
