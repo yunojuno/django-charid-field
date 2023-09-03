@@ -41,6 +41,9 @@ class IDModel(models.Model):
     # Showcase the default field but without an index.
     no_index_id = TestUIDField(unique=False)
 
+    # Showcase setting unique explicitly.
+    unique_id = TestUIDField(unique=True)
+
     # Showcase with a static default + a prefix. This is very much an edge
     # case as I can't think of a good reason to ever want a static default
     # for an ID field, but given you can call it like this: we should test it.
