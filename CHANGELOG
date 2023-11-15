@@ -2,14 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-# v3.0
+# v0.4
 
 - Adds Django 5.0 to build matrix
 - Adds Python 3.12 to build matrix
 
 No code changes.
 
-# v3.0
+# v0.3
 
 - Adds support for Python 3.10 and 3.11
 - Adds support for Django 4.0 and 4.1
