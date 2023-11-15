@@ -1,6 +1,6 @@
 import pytest
 
-from .forms import PrefixedIDForm, NullableIDForm
+from .forms import NullableIDForm, PrefixedIDForm
 from .models import IDModel
 
 

@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 def prefixed_default(default: Callable | str, *, prefix: str) -> Callable:
     if callable(default):
-        return lambda: f"{prefix}{default()}"  # type: ignore[operator]
+        return lambda: f"{prefix}{default()}"
     else:
         return lambda: f"{prefix}{default}"
 
@@ -29,7 +29,6 @@ class CharIDField(CharField):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-
         self.prefix = prefix
 
         self.init_default = default

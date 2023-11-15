@@ -1,10 +1,10 @@
-from django.db import models
 from functools import partial
+
+from django.db import models
 
 from charidfield import CharIDField
 
 from .helpers import generate_test_uid
-
 
 # To show off the recommended partial-usage; in production code you would
 # likely be wrapping your own chosen ID generation scheme with a field of

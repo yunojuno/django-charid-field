@@ -3,12 +3,11 @@ from io import StringIO
 
 import pytest
 from django.core.management import call_command
-from django.core.serializers.base import DeserializationError
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
-from .models import IDModel, RelatedIDModel
 from .helpers import TEST_UID_REGEX, generate_test_uid
+from .models import IDModel, RelatedIDModel
 
 
 @pytest.mark.django_db
@@ -50,16 +49,14 @@ class TestIDModel:
         # never results in weird cross-contamination of defaults.
         assert (
             len(
-                set(
-                    [
-                        self.instance_a.id,
-                        self.instance_a.default_id,
-                        self.instance_a.prefixed_id,
-                        self.instance_a.null_id_with_no_default,
-                        self.instance_a.no_index_id,
-                        self.instance_a.prefixed_and_non_callable_default_id,
-                    ]
-                )
+                {
+                    self.instance_a.id,
+                    self.instance_a.default_id,
+                    self.instance_a.prefixed_id,
+                    self.instance_a.null_id_with_no_default,
+                    self.instance_a.no_index_id,
+                    self.instance_a.prefixed_and_non_callable_default_id,
+                }
             )
             == 6
         )

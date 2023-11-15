@@ -1,5 +1,5 @@
-import time
 import re
+import time
 
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
 
