@@ -10,6 +10,7 @@ repos:
     rev: "v0.1.5"
     hooks:
       - id: ruff
+        name: ruff check
         args: [--fix, --exit-non-zero-on-fix]
 
   # python static type checking
