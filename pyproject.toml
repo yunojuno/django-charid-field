@@ -1,6 +1,6 @@
 [project]
 name = "django-charid-field"
-version = "0.5"
+version = "0.6"
 description = "Provides a char-based, prefixable ID field for your Django models. Supports cuid, ksuid, ulid, et al."
 authors = [{ name = "YunoJuno", email = "code@yunojuno.com" }]
 requires-python = ">=3.11,<4"
