@@ -17,7 +17,7 @@ It can be used as the primary key, or simple another key on your models.
 -   Ability to work with the UID generation spec of your choice.
 -   Support for prefixing the ID on a per-model basis à la Stripe. e.g `cus_` => `cus_cjld2cjxh0000qzrmn831i7rn`
 -   Support for all database backends that support the `CharField`.
--   Support for Python 3.8 & above only.
+-   Support for Python 3.12+ and Django 5.2-6.0.
 
 ## 🤷 Why?
 
