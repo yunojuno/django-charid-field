@@ -1,46 +1,57 @@
-[tool.poetry]
+[project]
 name = "django-charid-field"
-version = "0.5"
+version = "0.6"
 description = "Provides a char-based, prefixable ID field for your Django models. Supports cuid, ksuid, ulid, et al."
+authors = [{ name = "YunoJuno", email = "code@yunojuno.com" }]
+requires-python = ">=3.11,<4"
+readme = "README.md"
 license = "MIT"
-authors = ["YunoJuno <code@yunojuno.com>"]
-maintainers = ["YunoJuno <code@yunojuno.com>"]
-readme = "README"
-repository = "https://github.com/yunojuno/django-charid-field"
-documentation = "https://github.com/yunojuno/django-charid-field/blob/master/README"
+maintainers = [{ name = "YunoJuno", email = "code@yunojuno.com" }]
 classifiers = [
     "Environment :: Web Environment",
-    "Framework :: Django :: 4.2",
-    "Framework :: Django :: 5.0",
     "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
-packages = [{ include = "charidfield" }]
+dependencies = ["django>=5.2"]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-django = "^4.2 || ^5.0"
+[project.urls]
+Repository = "https://github.com/yunojuno/django-charid-field"
+Documentation = "https://github.com/yunojuno/django-charid-field/blob/master/README"
 
-[tool.poetry.group.test.dependencies]
-coverage = "*"
-pytest = "*"
-pytest-cov = "*"
-pytest-django = "*"
-tox = "*"
+[dependency-groups]
+test = [
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "pytest-django",
+    "tox",
+]
+dev = [
+    "black",
+    "mypy",
+    "pre-commit",
+    "ruff",
+]
 
-[tool.poetry.group.dev.dependencies]
-black = "*"
-mypy = "*"
-pre-commit = "*"
-ruff = "*"
+[tool.uv]
+default-groups = [
+    "test",
+    "dev",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["charidfield"]
+
+[tool.hatch.build.targets.wheel]
+include = ["charidfield"]
 
 [build-system]
-requires = ["poetry_core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

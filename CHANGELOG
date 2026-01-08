@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+# v0.6
+
+- Adds support for Django 6.0
+- Adds support for Python 3.13 and 3.14
+- Drops support for Python 3.8, 3.9 and 3.10
+- Updates test workflows to ensure Django main branch is only tested with Python 3.14
+
 # v0.5
 
 - Adds Django 5.2 support
