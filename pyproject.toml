@@ -19,7 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
 ]
-dependencies = ["django>=5.2"]
+dependencies = ["django>=5.2,<7.0"]
 
 [project.urls]
 Repository = "https://github.com/yunojuno/django-charid-field"
