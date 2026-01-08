@@ -114,7 +114,7 @@ class Dog(models.Model):
 |**prefix**|`str` |❌|`""`|If provided, the ID strings generated as the field's default value will be prefixed. This provides a way to have a per-model prefix which can be helpful in providing a global namespace for your ID system. The prefix should be provided as a string literal (e.g `cus_`). For more, see below.|
 |**max_length**|`int`|✅|Set it|Controls the maximum length of the stored strings. Provide your own to match whatever ID system you pick, remembering to take into account the length of any prefixes you have configured. Also note that there is no perf/storage impact for modern Postgres so for that backend it is effectively an arbitary char limit.|
 |**primary_key**|`boolean`|❌|`False`|Set to `True` to replace Django's default `Autofield` that gets used as the primary key, else the field will be additional ID field available to the model.|
-|**unique**|`boolean`|❌|`True`|Whether the field should be treated as unique across the dataset; the field provides a sane default of `True` so that a database index is setup to protext you against collisions (whether due to chance or, more likely, a bug/human error). To turn the index off, simply pass `False`.|
+|**unique**|`boolean`|❌|`False`|Whether the field should be treated as unique across the dataset; when `primary_key=True`, unique is implied. Behave the same as in `django.do.models.fields.CharField`.
 
 All other `django.db.models.fields.CharField` keyword arguments should work as expected. See the [Django docs](https://docs.djangoproject.com/en/dev/ref/models/fields/#django.db.models.CharField).
 

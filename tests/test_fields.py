@@ -207,6 +207,7 @@ class TestIDModel:
         # object will not persist.
         self.instance_a.default_id = generate_test_uid()
         self.instance_a.prefixed_id = generate_test_uid(prefix="dev_")
+        self.instance_a.unique_id = generate_test_uid()
         self.instance_a.save()
         self.instance_a.refresh_from_db()
         assert self.instance_a.id == new_id
@@ -241,6 +242,23 @@ class TestIDModel:
         if old_id:
             assert IDModel.objects.filter(**{model_field_name: old_id}).count() == 0
 
+    @pytest.mark.parametrize(
+        "model_field_name, expected",
+        (
+            ("id", True),
+            ("unique_id", True),
+            ("default_id", False),
+            ("prefixed_id", False),
+            ("null_id_with_no_default", False),
+            ("not_null_id_but_blank", False),
+            ("no_index_id", False),
+            ("prefixed_and_non_callable_default_id", False),
+        ),
+    )
+    def test_unique_set_default(self, model_field_name, expected):
+        field = self.instance_a._meta.get_field(model_field_name)
+        assert field.unique is expected
+
     def test_foreign_key__with_parent_model__instance(self):
         related_instance = RelatedIDModel.objects.create(
             name="Blue Album", parent=self.instance_a
@@ -274,6 +292,7 @@ class TestIDModel:
                     "null_id_with_no_default": None,
                     "not_null_id_but_blank": "",
                     "no_index_id": self.instance_a.no_index_id,
+                    "unique_id": self.instance_a.unique_id,
                     "prefixed_and_non_callable_default_id": "test_abcde",
                 },
             },
@@ -287,6 +306,7 @@ class TestIDModel:
                     "null_id_with_no_default": None,
                     "not_null_id_but_blank": "",
                     "no_index_id": self.instance_b.no_index_id,
+                    "unique_id": self.instance_b.unique_id,
                     "prefixed_and_non_callable_default_id": "test_abcde",
                 },
             },

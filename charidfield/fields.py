@@ -41,10 +41,6 @@ class CharIDField(CharField):
         else:
             kwargs["default"] = default
 
-        # Ensure a unique index is set up by default unless the caller
-        # explicitly disables it; this seems like the sane thing to do.
-        kwargs.setdefault("unique", True)
-
         super().__init__(*args, **kwargs)
 
     def get_internal_type(self) -> str:
